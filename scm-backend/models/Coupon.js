@@ -32,6 +32,10 @@ const couponSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  isFirstOrderOnly: {
+    type: Boolean,
+    default: false
+  },
   usageLimit: {
     type: Number,
     default: null // null = unlimited uses

@@ -1,0 +1,241 @@
+<div class="cart-hero">
+  <div style="max-width:1280px;margin:0 auto">
+    <h1>🛒 My Cart</h1>
+    <div class="cart-bc">
+      <a href="index.html">Home</a><span>›</span><span>Cart</span>
+    </div>
+  </div>
+</div>
+
+<div class="cart-wrap">
+  <!-- CART ITEMS -->
+  <div>
+    <div id="cartLoading" class="acct-loading"><i class="fas fa-spinner"></i><p>Loading your cart&hellip;</p></div>
+    <div id="cartError" class="acct-error" style="display:none">
+      <i class="fas fa-triangle-exclamation" style="font-size:44px;color:var(--cream-mid)"></i>
+      <h3 style="font-family:var(--font-d);font-size:18px;color:var(--charcoal);margin:10px 0 6px">Couldn't load your cart</h3>
+      <p id="cartErrorMsg" style="color:var(--brown);font-size:13px"></p>
+    </div>
+    <div id="cartEmpty" class="acct-empty" style="display:none">
+      <i class="fas fa-cart-shopping" style="font-size:44px;color:var(--cream-mid)"></i>
+      <h3 style="font-family:var(--font-d);font-size:18px;color:var(--charcoal);margin:10px 0 6px">Your cart is empty</h3>
+      <p style="color:var(--brown);font-size:13px">Add some spices to get started!</p>
+      <div style="margin-top:16px"><a href="shop.html" class="btn-primary"><i class="fas fa-store"></i> Browse Shop</a></div>
+    </div>
+
+    <div class="cart-box" id="cartBox" style="display:none">
+      <div class="cart-hdr">
+        <span>Product</span><span>Price</span><span>Quantity</span><span>Total</span><span></span>
+      </div>
+      <div id="cartRows"></div>
+      <div class="cart-ft">
+        <div class="coup-row">
+          <input type="text" class="coup-inp" placeholder="Enter coupon code" id="couponCode"/>
+          <button class="coup-btn" onclick="applyCoupon()">Apply Code</button>
+        </div>
+        <a href="shop.html" style="font-size:13px;color:var(--red);font-weight:600;display:flex;align-items:center;gap:6px">
+          <i class="fas fa-arrow-left"></i> Continue Shopping
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER SUMMARY -->
+  <div id="cartSummaryWrap" style="display:none">
+    <div class="sum-box">
+      <div class="sum-title">Order Summary</div>
+      <div class="sum-row"><span id="sumItemsLabel">Subtotal (0 items)</span><span id="sumSubtotal">₹0</span></div>
+      <div class="sum-row"><span>Shipping</span><span class="sum-green" id="sumShipping">FREE ✓</span></div>
+      <div class="sum-row"><span>Discount</span><span class="sum-green" id="discountRow">— ₹0</span></div>
+      <div class="sum-row total"><span>Total</span><span id="sumTotal">₹0</span></div>
+      <button class="chk-btn" onclick="location.href='checkout.html'">
+        <i class="fas fa-lock"></i> Proceed to Checkout
+      </button>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--brown)">
+        <i class="fas fa-shield-alt" style="color:var(--green)"></i> 100% Secure Checkout
+      </div>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--cream-dark)">
+        <div style="font-size:11px;color:var(--brown);text-align:center;margin-bottom:10px">Accepted Payments</div>
+        <div class="pay-methods">
+          <span class="pay-chip2">UPI</span>
+          <span class="pay-chip2">Razorpay</span>
+          <span class="pay-chip2">Cards</span>
+          <span class="pay-chip2">NetBanking</span>
+          <span class="pay-chip2">COD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+window.addEventListener("scroll",()=>document.getElementById("mainNav").classList.toggle("scrolled",window.scrollY>10));
+const API_BASE = 'https://scm-backend-ork4.onrender.com';
+
+// Product images are now stored on Cloudinary as absolute URLs
+// (e.g. https://res.cloudinary.com/.../xyz.jpg), returned as-is unchanged.
+// This function is kept for backward compatibility with any older products
+// that may still have a relative local path saved (e.g. /uploads/...) directly would 404, since that
+// resolves against whatever domain is serving THIS page (e.g. Netlify), not
+// the backend (e.g. Render). This prefixes relative paths with API_BASE while
+// leaving already-absolute URLs (http/https) untouched.
+function scmImgUrl(path){
+  if(!path) return '';
+  return path.startsWith('http') ? path : API_BASE + path;
+}
+const TOKEN_KEY = 'scm_token';
+function scmGetToken(){ return localStorage.getItem(TOKEN_KEY); }
+function scmIsLoggedIn(){ return !!scmGetToken(); }
+function scmLogout(){ localStorage.removeItem(TOKEN_KEY); localStorage.removeItem('scm_user'); localStorage.removeItem('scm_cart_count'); window.location.href='login.html'; }
+async function scmApiFetch(path, options={}){
+  const token = scmGetToken();
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+  if(res.status === 401){ scmLogout(); throw new Error('Session expired'); }
+  if(!res.ok){
+    const body = await res.json().catch(()=>({}));
+    throw new Error(body.message || ('Request failed: ' + res.status));
+  }
+  return res.json();
+}
+function scmToast(msg, icon){
+  let t = document.getElementById('scmToast');
+  if(!t){ t = document.createElement('div'); t.id='scmToast'; t.className='scm-toast'; document.body.appendChild(t); }
+  t.innerHTML = `<i class="fas ${icon || 'fa-circle-check'}"></i> ${msg}`;
+  t.classList.add('show');
+  clearTimeout(window._scmToastTimer);
+  window._scmToastTimer = setTimeout(()=> t.classList.remove('show'), 3200);
+}
+function fmtMoney(n){ return '₹' + Number(n||0).toLocaleString('en-IN'); }
+
+let currentCart = null;
+let appliedDiscount = 0;
+
+async function loadCart(){
+  if(!scmIsLoggedIn()){
+    window.location.href = 'login.html?redirect=cart.html';
+    return;
+  }
+  try {
+    const cart = await scmApiFetch('/api/cart');
+    currentCart = cart;
+    document.getElementById('cartLoading').style.display = 'none';
+    if(!cart.items || !cart.items.length){
+      if(window.scmSetCartCount) window.scmSetCartCount(0);
+      document.getElementById('cartEmpty').style.display = 'block';
+      return;
+    }
+    document.getElementById('cartBox').style.display = 'block';
+    document.getElementById('cartSummaryWrap').style.display = 'block';
+    renderCart(cart);
+  } catch(err){
+    document.getElementById('cartLoading').style.display = 'none';
+    document.getElementById('cartError').style.display = 'block';
+    document.getElementById('cartErrorMsg').textContent = err.message || 'Please try again.';
+  }
+}
+
+function renderCart(cart){
+  const totalCount = (cart.items || []).reduce((s, it) => s + (it.quantity || 0), 0);
+  if(window.scmSetCartCount) window.scmSetCartCount(totalCount);
+  const rows = cart.items.map(item => {
+    const p = item.product || {};
+    const img = (p.images && p.images[0]) ? `<img src="${scmImgUrl(p.images[0])}" style="width:100%;height:100%;object-fit:cover;border-radius:8px"/>` : '🌶️';
+    return `<div class="cart-row" data-item-id="${item._id}">
+      <div class="cp">
+        <div class="ci">${img}</div>
+        <div><div class="cn">${p.name || 'Product'}</div><div class="cm">${item.weight} Pack</div></div>
+      </div>
+      <div class="cprice">${fmtMoney(item.price)}</div>
+      <div>
+        <div class="qty-ctrl">
+          <button class="qb" onclick="changeQty('${item._id}', -1)">−</button>
+          <div class="qn" id="qn-${item._id}">${item.quantity}</div>
+          <button class="qb" onclick="changeQty('${item._id}', 1)">+</button>
+        </div>
+      </div>
+      <div class="ctotal" id="ctotal-${item._id}">${fmtMoney(item.price * item.quantity)}</div>
+      <button class="cdel" onclick="removeItem('${item._id}')" title="Remove"><i class="fas fa-trash"></i></button>
+    </div>`;
+  }).join('');
+  document.getElementById('cartRows').innerHTML = rows;
+  renderSummary();
+}
+
+function computeSubtotal(){
+  return (currentCart.items || []).reduce((sum, it) => sum + it.price * it.quantity, 0);
+}
+function renderSummary(){
+  const subtotal = computeSubtotal();
+  const itemCount = (currentCart.items || []).reduce((s, it) => s + it.quantity, 0);
+  document.getElementById('sumItemsLabel').textContent = `Subtotal (${itemCount} item${itemCount!==1?'s':''})`;
+  document.getElementById('sumSubtotal').textContent = fmtMoney(subtotal);
+  document.getElementById('discountRow').textContent = appliedDiscount ? `− ${fmtMoney(appliedDiscount)}` : '— ₹0';
+  document.getElementById('sumTotal').textContent = fmtMoney(Math.max(0, subtotal - appliedDiscount));
+  // persist for checkout page to reuse
+  sessionStorage.setItem('scm_checkout_discount', String(appliedDiscount));
+  sessionStorage.setItem('scm_checkout_coupon', document.getElementById('couponCode').value.trim());
+}
+
+async function changeQty(itemId, dir){
+  const item = currentCart.items.find(it => it._id === itemId);
+  if(!item) return;
+  const newQty = Math.max(1, item.quantity + dir);
+  try {
+    const updated = await scmApiFetch('/api/cart/' + itemId, {
+      method: 'PUT',
+      body: JSON.stringify({ quantity: newQty })
+    });
+    currentCart = updated;
+    if(!currentCart.items.length){
+      if(window.scmSetCartCount) window.scmSetCartCount(0);
+      document.getElementById('cartBox').style.display = 'none';
+      document.getElementById('cartSummaryWrap').style.display = 'none';
+      document.getElementById('cartEmpty').style.display = 'block';
+      return;
+    }
+    renderCart(currentCart);
+  } catch(err){
+    scmToast(err.message || 'Could not update quantity', 'fa-triangle-exclamation');
+  }
+}
+
+async function removeItem(itemId){
+  try {
+    const updated = await scmApiFetch('/api/cart/' + itemId, { method: 'DELETE' });
+    currentCart = updated;
+    if(!currentCart.items.length){
+      if(window.scmSetCartCount) window.scmSetCartCount(0);
+      document.getElementById('cartBox').style.display = 'none';
+      document.getElementById('cartSummaryWrap').style.display = 'none';
+      document.getElementById('cartEmpty').style.display = 'block';
+      return;
+    }
+    renderCart(currentCart);
+    scmToast('Item removed from cart');
+  } catch(err){
+    scmToast(err.message || 'Could not remove item', 'fa-triangle-exclamation');
+  }
+}
+
+async function applyCoupon(){
+  const code = document.getElementById('couponCode').value.trim();
+  if(!code){ scmToast('Enter a coupon code', 'fa-triangle-exclamation'); return; }
+  const subtotal = computeSubtotal();
+  try {
+    const result = await scmApiFetch('/api/coupons/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code, orderValue: subtotal })
+    });
+    appliedDiscount = result.discount || 0;
+    renderSummary();
+    scmToast(`Coupon applied! ${result.discountPercent}% off`);
+  } catch(err){
+    appliedDiscount = 0;
+    renderSummary();
+    scmToast(err.message || 'Invalid coupon code', 'fa-triangle-exclamation');
+  }
+}
+
+loadCart();
+</script>

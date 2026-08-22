@@ -2,6 +2,7 @@
 // Handles: Validate coupon at checkout, Admin create/delete coupons
 
 const Coupon = require('../models/Coupon');
+const Order = require('../models/Order');
 
 // @route   POST /api/coupons/validate
 // @desc    Customer applies a coupon code at checkout
@@ -17,6 +18,16 @@ const validateCoupon = async (req, res) => {
       return res.status(400).json({ message: `Minimum order value of ₹${coupon.minOrderValue} required` });
     if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit)
       return res.status(400).json({ message: 'This coupon has reached its usage limit' });
+
+    if (coupon.isFirstOrderOnly) {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Please login to use this first-order offer' });
+      }
+      const previousOrders = await Order.countDocuments({ user: req.user._id, paymentStatus: { $ne: 'Failed' } });
+      if (previousOrders > 0) {
+        return res.status(400).json({ message: 'This first-order offer is only available to new customers.' });
+      }
+    }
 
     let discount = (orderValue * coupon.discountPercent) / 100;
     if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {

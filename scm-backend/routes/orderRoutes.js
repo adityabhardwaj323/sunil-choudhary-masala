@@ -3,17 +3,18 @@ const express = require('express');
 const router = express.Router();
 const {
   createPayment, placeOrder, getMyOrders, trackOrder,
-  getAllOrders, updateOrderStatus
+  getAllOrders, updateOrderStatus, cancelOrder
 } = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/auth');
 
-// Public route — anyone with an Order ID can track it
-router.get('/track/:orderId', trackOrder);
+// Customer-only route - securely tracks an order (ownership verified in controller)
+router.get('/track/:orderId', protect, trackOrder);
 
 // Logged-in customer routes
 router.post('/create-payment', protect, createPayment);
 router.post('/', protect, placeOrder);
 router.get('/my-orders', protect, getMyOrders);
+router.post('/:id/cancel', protect, cancelOrder);
 
 // Admin-only routes
 router.get('/', protect, adminOnly, getAllOrders);

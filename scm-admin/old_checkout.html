@@ -1,0 +1,510 @@
+<div class="checkout-hero">
+  <div style="max-width:1280px;margin:0 auto">
+    <h1>Checkout</h1>
+    <div class="steps">
+      <div class="step done"><div class="step-num">✓</div>&nbsp;Cart</div>
+      <div class="step-sep"></div>
+      <div class="step active"><div class="step-num">2</div>&nbsp;Delivery</div>
+      <div class="step-sep"></div>
+      <div class="step"><div class="step-num">3</div>&nbsp;Payment</div>
+      <div class="step-sep"></div>
+      <div class="step"><div class="step-num">4</div>&nbsp;Confirm</div>
+    </div>
+  </div>
+</div>
+
+<div id="coLoading" class="acct-loading"><i class="fas fa-spinner"></i><p>Loading your cart&hellip;</p></div>
+<div id="coError" class="acct-error" style="display:none">
+  <i class="fas fa-triangle-exclamation" style="font-size:44px;color:var(--cream-mid)"></i>
+  <h3 style="font-family:var(--font-d);font-size:18px;color:var(--charcoal);margin:10px 0 6px">Couldn't load checkout</h3>
+  <p id="coErrorMsg" style="color:var(--brown);font-size:13px"></p>
+</div>
+<div id="coEmpty" class="acct-empty" style="display:none">
+  <i class="fas fa-cart-shopping" style="font-size:44px;color:var(--cream-mid)"></i>
+  <h3 style="font-family:var(--font-d);font-size:18px;color:var(--charcoal);margin:10px 0 6px">Your cart is empty</h3>
+  <p style="color:var(--brown);font-size:13px">Add some products before checking out.</p>
+  <div style="margin-top:16px"><a href="shop.html" class="btn-primary"><i class="fas fa-store"></i> Browse Shop</a></div>
+</div>
+
+<div class="co-wrap" id="coWrap" style="display:none">
+  <div>
+    <!-- ADDRESS -->
+    <div class="fc">
+      <h2><i class="fas fa-map-marker-alt"></i> Delivery Address</h2>
+
+      <div class="map-picker">
+        <div class="map-picker-label"><i class="fas fa-map-location-dot"></i> Pin your exact delivery location (optional, but helps our delivery partner)</div>
+        <div class="map-search-wrap">
+          <i class="fas fa-search map-search-icon"></i>
+          <input type="text" class="map-search-input" id="mapSearchInput" placeholder="Search for your address, area, or landmark..."/>
+          <div class="map-search-results" id="mapSearchResults"></div>
+        </div>
+        <div class="map-picker-canvas" id="checkoutMap"></div>
+        <div class="map-picker-hint"><i class="fas fa-hand-pointer"></i> Click the map or drag the pin to fine-tune your location</div>
+        <div class="map-picker-coords" id="checkoutMapCoords"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="fg"><label>First Name *</label><input type="text" id="addrFirstName" placeholder="Sunil"/></div>
+        <div class="fg"><label>Last Name *</label><input type="text" id="addrLastName" placeholder="Sharma"/></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Phone Number *</label><input type="tel" id="addrPhone" placeholder="+91 98765 43210"/></div>
+        <div class="fg"><label>Alternate Phone</label><input type="tel" id="addrAltPhone" placeholder="Optional"/></div>
+      </div>
+      <div class="fg"><label>Email Address</label><input type="email" id="addrEmail" placeholder="you@email.com"/></div>
+      <div class="fg"><label>Address Line 1 *</label><input type="text" id="addrLine1" placeholder="House/Flat No., Building, Street"/></div>
+      <div class="fg"><label>Address Line 2</label><input type="text" id="addrLine2" placeholder="Area, Colony, Landmark (optional)"/></div>
+      <div class="form-row">
+        <div class="fg"><label>City *</label><input type="text" id="addrCity" placeholder="Jaipur"/></div>
+        <div class="fg"><label>State *</label>
+          <select id="addrState">
+            <option>Rajasthan</option><option>Delhi</option><option>Maharashtra</option>
+            <option>Gujarat</option><option>Uttar Pradesh</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>PIN Code *</label><input type="text" id="addrPincode" placeholder="302001" maxlength="6"/></div>
+        <div class="fg"><label>Address Type</label>
+          <select id="addrType"><option>Home</option><option>Office</option><option>Other</option></select>
+        </div>
+      </div>
+      <div id="addrErrorMsg" style="display:none;color:#e53935;font-size:12.5px;margin-top:6px"></div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div class="fc">
+      <h2><i class="fas fa-credit-card"></i> Payment Method</h2>
+      <div class="pay-opt sel" onclick="selPay(this, 'UPI')">
+        <input type="radio" name="pay" checked/>
+        <div><div class="pay-name">UPI Payment</div><div class="pay-desc">GPay, PhonePe, Paytm or any UPI app</div></div>
+        <div class="pay-emoji">📱</div>
+      </div>
+      <div class="pay-opt" onclick="selPay(this, 'Card')">
+        <input type="radio" name="pay"/>
+        <div><div class="pay-name">Debit / Credit Card</div><div class="pay-desc">Visa, Mastercard, RuPay accepted</div></div>
+        <div class="pay-emoji">💳</div>
+      </div>
+      <div class="pay-opt" onclick="selPay(this, 'NetBanking')">
+        <input type="radio" name="pay"/>
+        <div><div class="pay-name">Net Banking</div><div class="pay-desc">All major Indian banks supported</div></div>
+        <div class="pay-emoji">🏦</div>
+      </div>
+      <div class="pay-opt" onclick="selPay(this, 'COD')">
+        <input type="radio" name="pay"/>
+        <div><div class="pay-name">Cash on Delivery</div><div class="pay-desc">Pay when your order arrives (₹50 extra)</div></div>
+        <div class="pay-emoji">💵</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER SUMMARY -->
+  <div class="os-box">
+    <div class="os-title">Order Summary</div>
+    <div id="coItems"></div>
+    <div style="border-top:1px solid var(--cream-dark);margin-top:13px;padding-top:13px">
+      <div class="sr"><span>Subtotal</span><span id="coSubtotal">₹0</span></div>
+      <div class="sr"><span>Shipping</span><span id="coShipping" style="color:var(--green);font-weight:600">FREE</span></div>
+      <div class="sr"><span>Discount</span><span id="coDiscount" style="color:var(--green)">— ₹0</span></div>
+      <div class="sr tot"><span>Total</span><span id="coTotal">₹0</span></div>
+    </div>
+    <button class="place-btn" id="placeBtn" onclick="placeOrderNow()">
+      <i class="fas fa-lock"></i> <span id="placeBtnLabel">Place Order</span>
+    </button>
+    <p style="font-size:11px;color:var(--brown);text-align:center;margin-top:12px;line-height:1.6">
+      By placing this order you agree to our
+      <a href="terms.html" style="color:var(--red)">Terms</a> &amp;
+      <a href="privacy.html" style="color:var(--red)">Privacy Policy</a>
+    </p>
+  </div>
+</div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+window.addEventListener("scroll",()=>document.getElementById("mainNav").classList.toggle("scrolled",window.scrollY>10));
+const API_BASE = 'https://scm-backend-ork4.onrender.com';
+
+// Product images are now stored on Cloudinary as absolute URLs
+// (e.g. https://res.cloudinary.com/.../xyz.jpg), returned as-is unchanged.
+// This function is kept for backward compatibility with any older products
+// that may still have a relative local path saved (e.g. /uploads/...) directly would 404, since that
+// resolves against whatever domain is serving THIS page (e.g. Netlify), not
+// the backend (e.g. Render). This prefixes relative paths with API_BASE while
+// leaving already-absolute URLs (http/https) untouched.
+function scmImgUrl(path){
+  if(!path) return '';
+  return path.startsWith('http') ? path : API_BASE + path;
+}
+// TODO: replace with your real Razorpay key_id (public/publishable key, safe for frontend)
+const RAZORPAY_KEY_ID = 'RAZORPAY_KEY_ID_PLACEHOLDER';
+const TOKEN_KEY = 'scm_token';
+function scmGetToken(){ return localStorage.getItem(TOKEN_KEY); }
+function scmIsLoggedIn(){ return !!scmGetToken(); }
+function scmLogout(){ localStorage.removeItem(TOKEN_KEY); localStorage.removeItem('scm_user'); localStorage.removeItem('scm_cart_count'); window.location.href='login.html'; }
+async function scmApiFetch(path, options={}){
+  const token = scmGetToken();
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+  if(res.status === 401){ scmLogout(); throw new Error('Session expired'); }
+  if(!res.ok){
+    const body = await res.json().catch(()=>({}));
+    throw new Error(body.message || ('Request failed: ' + res.status));
+  }
+  return res.json();
+}
+function scmToast(msg, icon){
+  let t = document.getElementById('scmToast');
+  if(!t){ t = document.createElement('div'); t.id='scmToast'; t.className='scm-toast'; document.body.appendChild(t); }
+  t.innerHTML = `<i class="fas ${icon || 'fa-circle-check'}"></i> ${msg}`;
+  t.classList.add('show');
+  clearTimeout(window._scmToastTimer);
+  window._scmToastTimer = setTimeout(()=> t.classList.remove('show'), 3200);
+}
+function fmtMoney(n){ return '₹' + Number(n||0).toLocaleString('en-IN'); }
+
+let currentCart = null;
+// ============ MAP LOCATION PICKER (Leaflet + OpenStreetMap/Nominatim) ============
+// Reusable across checkout.html and account.html.
+// Usage: initMapPicker({ mapId, searchInputId, resultsId, coordsId, onLocationChange, defaultLat, defaultLng })
+// onLocationChange(lat, lng, addressParts) is called whenever the pin moves or a search result is picked.
+// addressParts = { addressLine1, city, state, pincode } best-effort parsed from Nominatim.
+
+const SCM_DEFAULT_LAT = 26.9124; // Jaipur, Rajasthan — sensible default center
+const SCM_DEFAULT_LNG = 75.7873;
+
+function scmParseNominatimAddress(item){
+  const a = item.address || {};
+  const road = a.road || a.pedestrian || a.neighbourhood || '';
+  const houseNumber = a.house_number || '';
+  const suburb = a.suburb || a.city_district || '';
+  return {
+    addressLine1: [houseNumber, road].filter(Boolean).join(' ') || item.display_name.split(',')[0],
+    addressLine2: suburb,
+    city: a.city || a.town || a.village || a.county || '',
+    state: a.state || '',
+    pincode: a.postcode || ''
+  };
+}
+
+function initMapPicker(opts){
+  const {
+    mapId, searchInputId, resultsId, coordsId,
+    onLocationChange, defaultLat, defaultLng
+  } = opts;
+
+  const startLat = defaultLat || SCM_DEFAULT_LAT;
+  const startLng = defaultLng || SCM_DEFAULT_LNG;
+
+  const map = L.map(mapId).setView([startLat, startLng], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(map);
+
+  const marker = L.marker([startLat, startLng], { draggable: true }).addTo(map);
+
+  function updateCoordsLabel(lat, lng){
+    const el = document.getElementById(coordsId);
+    if(el) el.textContent = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  }
+  updateCoordsLabel(startLat, startLng);
+
+  async function reverseGeocode(lat, lng){
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
+      const data = await res.json();
+      const parts = scmParseNominatimAddress(data);
+      onLocationChange(lat, lng, parts);
+    } catch(e){
+      onLocationChange(lat, lng, null);
+    }
+  }
+
+  marker.on('dragend', () => {
+    const pos = marker.getLatLng();
+    updateCoordsLabel(pos.lat, pos.lng);
+    reverseGeocode(pos.lat, pos.lng);
+  });
+
+  map.on('click', (e) => {
+    marker.setLatLng(e.latlng);
+    updateCoordsLabel(e.latlng.lat, e.latlng.lng);
+    reverseGeocode(e.latlng.lat, e.latlng.lng);
+  });
+
+  // ── Search box (Nominatim autocomplete) ──
+  const searchInput = document.getElementById(searchInputId);
+  const resultsBox = document.getElementById(resultsId);
+  let searchTimer = null;
+
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim();
+    if(q.length < 3){ resultsBox.classList.remove('show'); resultsBox.innerHTML = ''; return; }
+    resultsBox.innerHTML = '<div class="map-picker-loading">Searching…</div>';
+    resultsBox.classList.add('show');
+    searchTimer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=in&limit=5&q=${encodeURIComponent(q)}`);
+        const results = await res.json();
+        if(!results.length){
+          resultsBox.innerHTML = '<div class="map-picker-loading">No matches found.</div>';
+          return;
+        }
+        resultsBox.innerHTML = results.map((r, i) => `
+          <div class="map-search-result-item" data-idx="${i}">
+            <i class="fas fa-location-dot"></i><span>${r.display_name}</span>
+          </div>
+        `).join('');
+        resultsBox.querySelectorAll('.map-search-result-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const r = results[Number(el.dataset.idx)];
+            const lat = parseFloat(r.lat), lng = parseFloat(r.lon);
+            map.setView([lat, lng], 16);
+            marker.setLatLng([lat, lng]);
+            updateCoordsLabel(lat, lng);
+            searchInput.value = r.display_name;
+            resultsBox.classList.remove('show');
+            onLocationChange(lat, lng, scmParseNominatimAddress(r));
+          });
+        });
+      } catch(e){
+        resultsBox.innerHTML = '<div class="map-picker-loading">Search failed. Please try again.</div>';
+      }
+    }, 500); // debounce — respects Nominatim's usage policy of ~1 request/sec
+  });
+
+  document.addEventListener('click', (e) => {
+    if(!resultsBox.contains(e.target) && e.target !== searchInput){
+      resultsBox.classList.remove('show');
+    }
+  });
+
+  setTimeout(() => map.invalidateSize(), 200); // fixes rendering when map starts in a hidden/collapsed container
+
+  return { map, marker, setLocation: (lat, lng) => {
+    map.setView([lat, lng], 16);
+    marker.setLatLng([lat, lng]);
+    updateCoordsLabel(lat, lng);
+  }};
+}
+
+
+let selectedLat = null;
+let selectedLng = null;
+
+document.addEventListener('DOMContentLoaded', function(){
+  initMapPicker({
+    mapId: 'checkoutMap',
+    searchInputId: 'mapSearchInput',
+    resultsId: 'mapSearchResults',
+    coordsId: 'checkoutMapCoords',
+    onLocationChange: function(lat, lng, parts){
+      selectedLat = lat;
+      selectedLng = lng;
+      if(parts){
+        if(parts.addressLine1 && !document.getElementById('addrLine1').value) document.getElementById('addrLine1').value = parts.addressLine1;
+        if(parts.city) document.getElementById('addrCity').value = parts.city;
+        if(parts.pincode) document.getElementById('addrPincode').value = parts.pincode;
+        const stateSelect = document.getElementById('addrState');
+        if(parts.state){
+          const match = Array.from(stateSelect.options).find(o => o.value.toLowerCase() === parts.state.toLowerCase());
+          if(match) stateSelect.value = match.value;
+        }
+      }
+    }
+  });
+});
+
+let selectedPayment = 'UPI';
+let appliedDiscount = 0;
+let couponCode = '';
+
+function selPay(el, method){
+  document.querySelectorAll('.pay-opt').forEach(p => { p.classList.remove('sel'); p.querySelector('input').checked = false; });
+  el.classList.add('sel');
+  el.querySelector('input').checked = true;
+  selectedPayment = method;
+  updatePlaceButton();
+}
+
+async function loadCheckout(){
+  if(!scmIsLoggedIn()){
+    window.location.href = 'login.html?redirect=checkout.html';
+    return;
+  }
+  appliedDiscount = Number(sessionStorage.getItem('scm_checkout_discount') || 0);
+  couponCode = sessionStorage.getItem('scm_checkout_coupon') || '';
+  try {
+    const cart = await scmApiFetch('/api/cart');
+    currentCart = cart;
+    document.getElementById('coLoading').style.display = 'none';
+    if(!cart.items || !cart.items.length){
+      document.getElementById('coEmpty').style.display = 'block';
+      return;
+    }
+    document.getElementById('coWrap').style.display = 'grid';
+    renderSummary();
+  } catch(err){
+    document.getElementById('coLoading').style.display = 'none';
+    document.getElementById('coError').style.display = 'block';
+    document.getElementById('coErrorMsg').textContent = err.message || 'Please try again.';
+  }
+}
+
+function computeSubtotal(){
+  return (currentCart.items || []).reduce((sum, it) => sum + it.price * it.quantity, 0);
+}
+function computeShipping(subtotal){
+  let base = subtotal >= 499 ? 0 : 49;
+  if(selectedPayment === 'COD') base += 50;
+  return base;
+}
+function renderSummary(){
+  const subtotal = computeSubtotal();
+  const shipping = computeShipping(subtotal);
+  const total = Math.max(0, subtotal + shipping - appliedDiscount);
+
+  document.getElementById('coItems').innerHTML = (currentCart.items || []).map(item => {
+    const p = item.product || {};
+    const img = (p.images && p.images[0]) ? `<img src="${scmImgUrl(p.images[0])}" style="width:100%;height:100%;object-fit:cover;border-radius:6px"/>` : '🌶️';
+    return `<div class="oi"><div class="oi-img">${img}<span class="oi-qty">${item.quantity}</span></div><div><div class="oi-name">${p.name||'Product'}</div><div class="oi-meta">${item.weight} × ${item.quantity}</div></div><div class="oi-price">${fmtMoney(item.price*item.quantity)}</div></div>`;
+  }).join('');
+
+  document.getElementById('coSubtotal').textContent = fmtMoney(subtotal);
+  document.getElementById('coShipping').textContent = shipping === 0 ? 'FREE' : fmtMoney(shipping);
+  document.getElementById('coDiscount').textContent = appliedDiscount ? `− ${fmtMoney(appliedDiscount)}` : '— ₹0';
+  document.getElementById('coTotal').textContent = fmtMoney(total);
+  updatePlaceButton();
+}
+function updatePlaceButton(){
+  const subtotal = computeSubtotal();
+  const shipping = computeShipping(subtotal);
+  const total = Math.max(0, subtotal + shipping - appliedDiscount);
+  document.getElementById('placeBtnLabel').textContent = `Place Order — ${fmtMoney(total)}`;
+}
+
+function validateAddress(){
+  const required = ['addrFirstName','addrLastName','addrPhone','addrLine1','addrCity','addrPincode'];
+  for(const id of required){
+    if(!document.getElementById(id).value.trim()){
+      document.getElementById('addrErrorMsg').textContent = 'Please fill all required fields (marked *).';
+      document.getElementById('addrErrorMsg').style.display = 'block';
+      document.getElementById(id).focus();
+      return false;
+    }
+  }
+  document.getElementById('addrErrorMsg').style.display = 'none';
+  return true;
+}
+function getShippingAddress(){
+  return {
+    firstName: document.getElementById('addrFirstName').value.trim(),
+    lastName: document.getElementById('addrLastName').value.trim(),
+    phone: document.getElementById('addrPhone').value.trim(),
+    alternatePhone: document.getElementById('addrAltPhone').value.trim(),
+    email: document.getElementById('addrEmail').value.trim(),
+    addressLine1: document.getElementById('addrLine1').value.trim(),
+    addressLine2: document.getElementById('addrLine2').value.trim(),
+    city: document.getElementById('addrCity').value.trim(),
+    state: document.getElementById('addrState').value,
+    pincode: document.getElementById('addrPincode').value.trim(),
+    addressType: document.getElementById('addrType').value,
+    latitude: selectedLat,
+    longitude: selectedLng
+  };
+}
+function getOrderItems(){
+  return (currentCart.items || []).map(item => ({
+    product: item.product._id || item.product,
+    name: item.product.name,
+    weight: item.weight,
+    price: item.price,
+    quantity: item.quantity,
+    image: (item.product.images && item.product.images[0]) || ''
+  }));
+}
+
+async function placeOrderNow(){
+  if(!validateAddress()) return;
+  const btn = document.getElementById('placeBtn');
+  btn.disabled = true;
+
+  const subtotal = computeSubtotal();
+  const shipping = computeShipping(subtotal);
+  const total = Math.max(0, subtotal + shipping - appliedDiscount);
+  const baseOrderPayload = {
+    items: getOrderItems(),
+    shippingAddress: getShippingAddress(),
+    paymentMethod: selectedPayment,
+    subtotal, shippingCharge: shipping, discount: appliedDiscount,
+    couponCode, totalAmount: total
+  };
+
+  if(selectedPayment === 'COD'){
+    try {
+      const order = await scmApiFetch('/api/orders', { method: 'POST', body: JSON.stringify(baseOrderPayload) });
+      onOrderSuccess(order);
+    } catch(err){
+      scmToast(err.message || 'Could not place order', 'fa-triangle-exclamation');
+      btn.disabled = false;
+    }
+    return;
+  }
+
+  // Razorpay flow (UPI / Card / NetBanking)
+  try {
+    const rzpOrder = await scmApiFetch('/api/orders/create-payment', {
+      method: 'POST',
+      body: JSON.stringify({ amount: total })
+    });
+    const options = {
+      key: RAZORPAY_KEY_ID,
+      amount: rzpOrder.amount,
+      currency: rzpOrder.currency || 'INR',
+      name: 'Sunil Choudhary Masala',
+      description: 'Order Payment',
+      order_id: rzpOrder.id,
+      handler: async function(response){
+        try {
+          const order = await scmApiFetch('/api/orders', {
+            method: 'POST',
+            body: JSON.stringify(Object.assign({}, baseOrderPayload, {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature
+            }))
+          });
+          onOrderSuccess(order);
+        } catch(err){
+          scmToast(err.message || 'Payment succeeded but order failed to save. Contact support.', 'fa-triangle-exclamation');
+          btn.disabled = false;
+        }
+      },
+      modal: { ondismiss: function(){ btn.disabled = false; } },
+      prefill: {
+        name: document.getElementById('addrFirstName').value + ' ' + document.getElementById('addrLastName').value,
+        contact: document.getElementById('addrPhone').value,
+        email: document.getElementById('addrEmail').value
+      },
+      theme: { color: '#B5390A' }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+  } catch(err){
+    scmToast(err.message || 'Could not initiate payment. Please try again.', 'fa-triangle-exclamation');
+    btn.disabled = false;
+  }
+}
+
+function onOrderSuccess(order){
+  sessionStorage.removeItem('scm_checkout_discount');
+  sessionStorage.removeItem('scm_checkout_coupon');
+  if(window.scmSetCartCount) window.scmSetCartCount(0); // backend clears the cart on successful order
+  scmToast('Order placed successfully!');
+  window.location.href = 'order-detail.html?orderId=' + encodeURIComponent(order.orderId);
+}
+
+loadCheckout();
+</script>

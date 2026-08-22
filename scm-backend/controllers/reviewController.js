@@ -31,10 +31,31 @@ const recalcProductRating = async (productId) => {
 const addReview = async (req, res) => {
   try {
     const { rating, comment } = req.body;
+    const productId = req.params.productId;
+    const userId = req.user._id;
+
+    // 1. Verify that the user has actually purchased and received the product.
+    // Must be Delivered, not Cancelled, and belong to the user.
+    const Order = require('../models/Order');
+    const validOrder = await Order.findOne({
+      user: userId,
+      orderStatus: 'Delivered',
+      'items.product': productId
+    });
+
+    if (!validOrder) {
+      return res.status(403).json({ message: 'You can only review products that have been delivered to you.' });
+    }
+
+    // 2. Prevent duplicate reviews
+    const existingReview = await Review.findOne({ product: productId, user: userId });
+    if (existingReview) {
+      return res.status(400).json({ message: 'You have already reviewed this product.' });
+    }
 
     const review = await Review.create({
-      product: req.params.productId,
-      user: req.user._id,
+      product: productId,
+      user: userId,
       userName: req.user.firstName,
       rating,
       comment

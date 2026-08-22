@@ -1,0 +1,291 @@
+<div class="page-hero">
+  <h1>Our Masala Collection</h1>
+  <p>Pure · Authentic · Stone-Ground · Rajasthani</p>
+  <div class="breadcrumb"><a href="index.html">Home</a><span>›</span><span>Shop</span></div>
+</div>
+
+<div class="shop-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="filter-box">
+      <h3>🗂️ Categories</h3>
+      <div class="fopt"><input type="checkbox" id="catAll" checked onchange="onCategoryToggle('all')"/><label>All Products</label></div>
+      <div class="fopt"><input type="checkbox" class="cat-checkbox" data-cat="Red Chilli" onchange="onCategoryToggle('Red Chilli')"/><label>Red Chilli</label></div>
+      <div class="fopt"><input type="checkbox" class="cat-checkbox" data-cat="Turmeric" onchange="onCategoryToggle('Turmeric')"/><label>Turmeric</label></div>
+      <div class="fopt"><input type="checkbox" class="cat-checkbox" data-cat="Coriander" onchange="onCategoryToggle('Coriander')"/><label>Coriander</label></div>
+      <div class="fopt"><input type="checkbox" class="cat-checkbox" data-cat="Spice Blends" onchange="onCategoryToggle('Spice Blends')"/><label>Spice Blends</label></div>
+      <div class="fopt"><input type="checkbox" class="cat-checkbox" data-cat="Special Masala" onchange="onCategoryToggle('Special Masala')"/><label>Special Masala</label></div>
+      <div class="fopt"><input type="checkbox" class="cat-checkbox" data-cat="Gift Box" onchange="onCategoryToggle('Gift Box')"/><label>Gift Box</label></div>
+    </div>
+    <div class="filter-box">
+      <h3>💰 Price Range</h3>
+      <input type="range" class="price-range" id="priceRange" min="50" max="1000" value="1000"
+        oninput="document.getElementById('pv').textContent='₹'+this.value" onchange="loadProducts()"/>
+      <div class="price-labels"><span>₹50</span><span id="pv">₹1000</span></div>
+    </div>
+    <button class="btn-primary" style="width:100%;justify-content:center;" onclick="loadProducts()">Apply Filters</button>
+  </aside>
+
+  <!-- PRODUCTS -->
+  <div>
+    <div class="cat-tabs">
+      <button class="cat-tab active" onclick="filterTab(this,'all')">All</button>
+      <button class="cat-tab" onclick="filterTab(this,'Red Chilli')">🌶️ Red Chilli</button>
+      <button class="cat-tab" onclick="filterTab(this,'Turmeric')">🟡 Turmeric</button>
+      <button class="cat-tab" onclick="filterTab(this,'Coriander')">🌿 Coriander</button>
+      <button class="cat-tab" onclick="filterTab(this,'Spice Blends')">🫙 Blends</button>
+      <button class="cat-tab" onclick="filterTab(this,'Gift Box')">🎁 Gift Boxes</button>
+    </div>
+    <div class="shop-top">
+      <p class="result-count" id="resultCount">Loading products&hellip;</p>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="view-btns">
+          <button class="view-btn active" onclick="toggleView(this,'grid')"><i class="fas fa-th"></i></button>
+          <button class="view-btn" onclick="toggleView(this,'list')"><i class="fas fa-list"></i></button>
+        </div>
+        <select class="sort-select" id="sortSelect" onchange="loadProducts()">
+          <option value="">Sort: Featured</option>
+          <option value="price_low">Price: Low to High</option>
+          <option value="price_high">Price: High to Low</option>
+          <option value="rating">Best Rated</option>
+          <option value="newest">Newest First</option>
+        </select>
+      </div>
+    </div>
+    <div class="prod-grid" id="prodGrid"><div class="acct-loading" style="grid-column:1/-1"><i class="fas fa-spinner"></i></div></div>
+    <div class="acct-empty" id="shopEmpty" style="display:none">
+      <i class="fas fa-box-open" style="font-size:44px;color:var(--cream-mid)"></i>
+      <h3 style="font-family:var(--font-d);font-size:18px;color:var(--charcoal);margin:10px 0 6px">No products found</h3>
+      <p style="color:var(--brown);font-size:13px">Try adjusting your filters or search.</p>
+    </div>
+    <div class="acct-error" id="shopError" style="display:none">
+      <i class="fas fa-triangle-exclamation" style="font-size:44px;color:var(--cream-mid)"></i>
+      <h3 style="font-family:var(--font-d);font-size:18px;color:var(--charcoal);margin:10px 0 6px">Couldn't load products</h3>
+      <p id="shopErrorMsg" style="color:var(--brown);font-size:13px">Please check your connection and try again.</p>
+    </div>
+  </div>
+</div>
+<script>
+window.addEventListener("scroll",()=>document.getElementById("mainNav").classList.toggle("scrolled",window.scrollY>10));
+// ===== SCM shared API helpers (used across all pages) =====
+// Update API_BASE if the backend is hosted on a different origin, e.g. 'https://api.sunilchoudharymasala.com'
+const API_BASE = 'https://scm-backend-ork4.onrender.com';
+
+// Product images are now stored on Cloudinary as absolute URLs
+// (e.g. https://res.cloudinary.com/.../xyz.jpg), returned as-is unchanged.
+// This function is kept for backward compatibility with any older products
+// that may still have a relative local path saved (e.g. /uploads/...) directly would 404, since that
+// resolves against whatever domain is serving THIS page (e.g. Netlify), not
+// the backend (e.g. Render). This prefixes relative paths with API_BASE while
+// leaving already-absolute URLs (http/https) untouched.
+function scmImgUrl(path){
+  if(!path) return '';
+  return path.startsWith('http') ? path : API_BASE + path;
+}
+const TOKEN_KEY = 'scm_token';
+const USER_CACHE_KEY = 'scm_user';
+
+function scmGetToken(){ return localStorage.getItem(TOKEN_KEY); }
+function scmSetSession(data){
+  localStorage.setItem(TOKEN_KEY, data.token);
+  localStorage.setItem(USER_CACHE_KEY, JSON.stringify(data));
+}
+function scmLogout(){
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_CACHE_KEY);
+  localStorage.removeItem('scm_cart_count');
+  window.location.href = 'login.html';
+}
+function scmIsLoggedIn(){ return !!scmGetToken(); }
+function scmRequireAuth(){
+  const token = scmGetToken();
+  if(!token){
+    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname.split('/').pop() + window.location.search);
+    return null;
+  }
+  return token;
+}
+async function scmApiFetch(path, options={}){
+  const token = scmGetToken();
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+  if(res.status === 401){
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_CACHE_KEY);
+    throw new Error('Session expired. Please log in again.');
+  }
+  if(!res.ok){
+    const body = await res.json().catch(()=>({}));
+    throw new Error(body.message || ('Request failed: ' + res.status));
+  }
+  return res.json();
+}
+function scmToast(msg, icon){
+  let t = document.getElementById('scmToast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'scmToast';
+    t.className = 'scm-toast';
+    document.body.appendChild(t);
+  }
+  t.innerHTML = `<i class="fas ${icon || 'fa-circle-check'}"></i> ${msg}`;
+  t.classList.add('show');
+  clearTimeout(window._scmToastTimer);
+  window._scmToastTimer = setTimeout(()=> t.classList.remove('show'), 3200);
+}
+function scmInitials(first, last){
+  return ((first||'?')[0] + (last||'')[0]).toUpperCase();
+}
+function scmFmtMoney(n){
+  return '₹' + Number(n || 0).toLocaleString('en-IN');
+}
+function scmGetCartCount(){
+  try {
+    const c = JSON.parse(localStorage.getItem('scm_cart_count') || '0');
+    return c;
+  } catch(e){ return 0; }
+}
+function scmUpdateCartBadge(count){
+  localStorage.setItem('scm_cart_count', JSON.stringify(count));
+  document.querySelectorAll('.cart-badge, .nav-cart-count').forEach(el => {
+    el.textContent = count;
+    el.style.display = count > 0 ? 'flex' : 'none';
+  });
+}
+
+let currentCategory = 'all';
+
+function filterTab(el, cat){
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentCategory = cat;
+  document.getElementById('catAll').checked = (cat === 'all');
+  document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = (cb.dataset.cat === cat));
+  loadProducts();
+}
+function onCategoryToggle(cat){
+  if(cat === 'all'){
+    document.getElementById('catAll').checked = true;
+    document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = false);
+    currentCategory = 'all';
+  } else {
+    document.getElementById('catAll').checked = false;
+    document.querySelectorAll('.cat-checkbox').forEach(cb => { if(cb.dataset.cat !== cat) cb.checked = false; });
+    currentCategory = cat;
+  }
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  loadProducts();
+}
+function toggleView(el,type){
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const g=document.getElementById('prodGrid');
+  g.style.gridTemplateColumns=type==='list'?'1fr':'repeat(auto-fill,minmax(210px,1fr))';
+}
+
+function productCardHTML(p){
+  const variant = (p.variants && p.variants[0]) || { price: 0, mrp: 0 };
+  const weights = (p.variants||[]).map(v=>v.weight).join(' | ');
+  const img = (p.images && p.images[0]) ? `<img src="${scmImgUrl(p.images[0])}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover"/>` : '🌶️';
+  const stars = '★'.repeat(Math.round(p.ratingAvg||0)) + '☆'.repeat(5-Math.round(p.ratingAvg||0));
+  const badge = p.isBestseller ? 'Bestseller' : (p.isNewArrival ? 'New' : (p.isFeatured ? 'Featured' : ''));
+  return `<div class="prod-card" data-id="${p._id}">
+    <div class="prod-img" onclick="window.location.href='product.html?id=${p._id}'" style="cursor:pointer">${img}${badge ? `<span class="prod-badge">${badge}</span>` : ''}<button class="prod-wish" onclick="event.stopPropagation();toggleWishlist('${p._id}', this)"><i class="far fa-heart"></i></button></div>
+    <div class="prod-body">
+      <div class="prod-cat">${p.category}</div>
+      <div class="prod-name" onclick="window.location.href='product.html?id=${p._id}'" style="cursor:pointer">${p.name}</div>
+      <div class="prod-meta">${weights || 'Weight options available'}</div>
+      <div class="stars">${stars} <span style="color:var(--brown);font-size:11px">(${p.ratingCount||0})</span></div>
+      <div class="prod-footer">
+        <div><span class="prod-price">${scmFmtMoney(variant.price)}</span>${variant.mrp > variant.price ? `<span class="prod-old">${scmFmtMoney(variant.mrp)}</span>` : ''}</div>
+        <button class="btn-cart" onclick="addToCart('${p._id}', '${variant.weight||''}', this)"><i class="fas fa-plus"></i> Add</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadProducts(){
+  const grid = document.getElementById('prodGrid');
+  const resultCount = document.getElementById('resultCount');
+  const emptyBox = document.getElementById('shopEmpty');
+  const errorBox = document.getElementById('shopError');
+  emptyBox.style.display = 'none';
+  errorBox.style.display = 'none';
+  resultCount.textContent = 'Loading products\u2026';
+
+  const params = new URLSearchParams();
+  if(currentCategory && currentCategory !== 'all') params.set('category', currentCategory);
+  const search = new URLSearchParams(window.location.search).get('search');
+  if(search) params.set('search', search);
+  const maxPrice = document.getElementById('priceRange').value;
+  if(maxPrice) params.set('maxPrice', maxPrice);
+  const sort = document.getElementById('sortSelect').value;
+  if(sort) params.set('sort', sort);
+
+  try {
+    const res = await fetch(API_BASE + '/api/products?' + params.toString());
+    const data = await res.json();
+    const products = data.products || data || [];
+    if(!products.length){
+      grid.innerHTML = '';
+      emptyBox.style.display = 'block';
+      resultCount.textContent = 'Showing 0 products';
+      return;
+    }
+    grid.innerHTML = products.map(productCardHTML).join('');
+    resultCount.innerHTML = `Showing <strong>${products.length}</strong> product(s)`;
+  } catch(err){
+    grid.innerHTML = '';
+    errorBox.style.display = 'block';
+    document.getElementById('shopErrorMsg').textContent = err.message || 'Please check your connection and try again.';
+    resultCount.textContent = '';
+  }
+}
+
+async function addToCart(productId, weight, btn){
+  if(!scmIsLoggedIn()){
+    window.location.href = 'login.html?redirect=shop.html';
+    return;
+  }
+  try {
+    const updatedCart = await scmApiFetch('/api/cart', {
+      method: 'POST',
+      body: JSON.stringify({ productId, weight, quantity: 1 })
+    });
+    const count = (updatedCart.items || []).reduce((s, it) => s + (it.quantity || 0), 0);
+    if(window.scmSetCartCount) window.scmSetCartCount(count);
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Added';
+    btn.style.background = '#2A6B4A';
+    setTimeout(()=>{ btn.innerHTML = orig; btn.style.background = ''; }, 1500);
+    scmToast('1 item added to cart', 'fa-cart-shopping');
+  } catch(err){
+    scmToast(err.message || 'Could not add to cart', 'fa-triangle-exclamation');
+  }
+}
+
+async function toggleWishlist(productId, btn){
+  if(!scmIsLoggedIn()){
+    window.location.href = 'login.html?redirect=shop.html';
+    return;
+  }
+  const icon = btn.querySelector('i');
+  const isWished = icon.classList.contains('fas');
+  try {
+    if(isWished){
+      await scmApiFetch('/api/wishlist/' + productId, { method: 'DELETE' });
+    } else {
+      await scmApiFetch('/api/wishlist/' + productId, { method: 'POST' });
+    }
+    icon.classList.toggle('far');
+    icon.classList.toggle('fas');
+    btn.style.background = icon.classList.contains('fas') ? 'var(--red)' : '#fff';
+    btn.style.color = icon.classList.contains('fas') ? '#fff' : 'var(--brown)';
+  } catch(err){
+    scmToast(err.message || 'Could not update wishlist', 'fa-triangle-exclamation');
+  }
+}
+
+loadProducts();
+</script>

@@ -2,6 +2,7 @@
 // Handles: View products (customer side) + Add/Edit/Delete products (admin side)
 
 const Product = require('../models/Product');
+const cloudinary = require('../config/cloudinary');
 
 // @route   GET /api/products
 // @desc    Get all products with optional filters (category, price, search, sort)
@@ -93,4 +94,37 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getProductById, createProduct, updateProduct, deleteProduct };
+// @route   POST /api/products/upload-images  (ADMIN ONLY)
+// @desc    Upload one or more product images to Cloudinary and return their
+//          public, permanent URLs. The frontend then includes these URLs in
+//          the `images` array when calling createProduct/updateProduct —
+//          this endpoint only handles image storage, it does not touch any
+//          Product document itself.
+const uploadProductImages = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'No image files were uploaded' });
+    }
+
+    // multer.memoryStorage() gives us each file as a Buffer (req.files[i].buffer)
+    // rather than a path on disk. Cloudinary's SDK accepts a base64 data URI
+    // directly, so we convert in memory and upload — no local file ever touches disk.
+    const uploads = await Promise.all(
+      req.files.map(file => {
+        const base64 = file.buffer.toString('base64');
+        const dataUri = `data:${file.mimetype};base64,${base64}`;
+        return cloudinary.uploader.upload(dataUri, {
+          folder: 'scm-products',
+          resource_type: 'image'
+        });
+      })
+    );
+
+    const urls = uploads.map(result => result.secure_url);
+    res.json({ urls });
+  } catch (error) {
+    res.status(500).json({ message: 'Image upload failed', error: error.message });
+  }
+};
+
+module.exports = { getProducts, getProductById, createProduct, updateProduct, deleteProduct, uploadProductImages };

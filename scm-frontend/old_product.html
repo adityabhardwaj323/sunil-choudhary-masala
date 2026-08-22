@@ -1,0 +1,432 @@
+<div class="detail-hero">
+  <div class="det-bc">
+    <a href="index.html">Home</a><span>›</span>
+    <a href="shop.html">Shop</a><span>›</span>
+    <span id="pdBreadcrumbName" style="color:rgba(255,255,255,.8)">Loading&hellip;</span>
+  </div>
+</div>
+
+<div id="pdLoading" class="acct-loading" style="padding:80px 20px"><i class="fas fa-spinner"></i><p>Loading product&hellip;</p></div>
+<div id="pdError" class="acct-error" style="display:none;padding:80px 20px">
+  <i class="fas fa-triangle-exclamation" style="font-size:44px;color:var(--cream-mid)"></i>
+  <h3 style="font-family:var(--font-d);font-size:18px;color:var(--charcoal);margin:10px 0 6px">Product not found</h3>
+  <p id="pdErrorMsg" style="color:var(--brown);font-size:13px">Please check the link and try again.</p>
+  <div style="margin-top:16px"><a href="shop.html" class="btn-primary">Back to Shop</a></div>
+</div>
+
+<div class="detail-layout" id="pdContent" style="display:none">
+  <!-- GALLERY -->
+  <div>
+    <div class="gal-main" id="galMain">🌶️</div>
+    <div class="gal-thumbs" id="galThumbs"></div>
+  </div>
+
+  <!-- PRODUCT INFO -->
+  <div>
+    <div class="prod-tag" id="pdCategory">Category</div>
+    <h1 class="prod-title" id="pdName">&mdash;</h1>
+    <div class="rat-row">
+      <span class="stars-lg" id="pdStars">☆☆☆☆☆</span>
+      <span class="rat-count" id="pdRatCount">0 · 0 reviews</span>
+      <span class="sold-count" id="pdSoldCount">✔ 0 Sold</span>
+    </div>
+    <div class="price-row" id="pdPriceRow"></div>
+    <div class="stock-ok" id="pdStock"><i class="fas fa-check-circle"></i> In Stock — Ships within 24 hours</div>
+
+    <div class="size-lbl">Select Pack Size:</div>
+    <div class="size-opts" id="pdSizeOpts"></div>
+
+    <div class="qty-row">
+      <span style="font-size:14px;font-weight:600;color:var(--charcoal)">Quantity:</span>
+      <div class="qty-ctrl">
+        <button class="qty-b" onclick="let n=document.getElementById('qty');if(+n.textContent>1)n.textContent=+n.textContent-1">−</button>
+        <div class="qty-n" id="qty">1</div>
+        <button class="qty-b" onclick="let n=document.getElementById('qty');n.textContent=+n.textContent+1">+</button>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-primary" style="flex:1;justify-content:center;padding:15px;" onclick="addToCart()">
+        <i class="fas fa-shopping-bag"></i> Add to Cart
+      </button>
+      <button class="btn-wish" id="pdWishBtn" onclick="toggleWish()">
+        <i class="far fa-heart"></i> Wishlist
+      </button>
+    </div>
+    <button class="btn-primary" style="width:100%;justify-content:center;background:var(--charcoal);margin-bottom:20px;padding:15px;" onclick="buyNow()">
+      <i class="fas fa-bolt"></i> Buy Now
+    </button>
+
+    <div class="del-box">
+      <div class="del-item"><i class="fas fa-truck"></i><span><strong>Free Delivery</strong> on orders above ₹499</span></div>
+      <div class="del-item"><i class="fas fa-redo"></i><span><strong>Easy 7-Day Returns</strong> — no questions asked</span></div>
+      <div class="del-item"><i class="fas fa-certificate"></i><span><strong>FSSAI Certified</strong> · 100% Natural · No Additives</span></div>
+      <div class="del-item" id="pdBatchInfo"><i class="fas fa-calendar-alt"></i><span><strong>Batch Date:</strong> &mdash;</span></div>
+    </div>
+
+    <div class="tab-nav">
+      <div class="tab-lnk active" onclick="openTab(this,'tdesc')">Description</div>
+      <div class="tab-lnk" onclick="openTab(this,'tingr')">Ingredients</div>
+      <div class="tab-lnk" onclick="openTab(this,'tnutr')">Nutrition</div>
+    </div>
+    <div class="tab-pane active" id="tdesc">
+      <p id="pdDescription">&mdash;</p>
+    </div>
+    <div class="tab-pane" id="tingr">
+      <p id="pdIngredients">&mdash;</p>
+      <p id="pdFssai" style="margin-top:10px;font-size:12px;color:var(--brown)"></p>
+    </div>
+    <div class="tab-pane" id="tnutr">
+      <p><strong>Nutritional Info (per 100g):</strong></p>
+      <div id="pdNutrition" style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEWS -->
+<div class="reviews-wrap" id="pdReviewsWrap" style="display:none">
+  <h2 class="h2" style="margin-bottom:24px;">Customer Reviews</h2>
+  <div class="rev-summary">
+    <div class="avg-score">
+      <div class="avg-num" id="pdAvgNum">0.0</div>
+      <div class="avg-stars" id="pdAvgStars">☆☆☆☆☆</div>
+      <div class="avg-total" id="pdAvgTotal">0 reviews</div>
+    </div>
+    <div class="bars" id="pdRevWriteBox">
+      <button class="btn-primary" onclick="showReviewForm()"><i class="fas fa-pen"></i> Write a Review</button>
+      <div id="pdReviewForm" style="display:none;margin-top:16px">
+        <div style="margin-bottom:8px">
+          <label style="font-size:12.5px;color:var(--brown)">Your Rating</label><br/>
+          <select id="pdRevRating" style="padding:8px;border-radius:6px;border:1px solid var(--cream-dark)">
+            <option value="5">★★★★★ Excellent</option>
+            <option value="4">★★★★☆ Good</option>
+            <option value="3">★★★☆☆ Average</option>
+            <option value="2">★★☆☆☆ Poor</option>
+            <option value="1">★☆☆☆☆ Very Poor</option>
+          </select>
+        </div>
+        <textarea id="pdRevComment" placeholder="Share your experience with this product..." style="width:100%;min-height:70px;padding:10px;border-radius:8px;border:1px solid var(--cream-dark);font-family:'Inter',sans-serif;margin-bottom:10px"></textarea>
+        <button class="btn-primary" onclick="submitReview()"><i class="fas fa-paper-plane"></i> Submit Review</button>
+      </div>
+    </div>
+  </div>
+  <div class="rev-grid" id="pdReviewGrid"></div>
+  <div id="pdNoReviews" style="display:none;color:var(--brown);font-size:13.5px;padding:20px 0">No reviews yet. Be the first to review this product!</div>
+</div>
+
+<!-- RELATED PRODUCTS -->
+<div class="related-sec" id="pdRelatedSec" style="display:none">
+  <div class="related-inner">
+    <span class="eyebrow">✦ You May Also Like</span>
+    <h2 class="h2">Related Products</h2>
+    <div class="related-grid" id="pdRelatedGrid"></div>
+  </div>
+</div>
+<script>
+window.addEventListener("scroll",()=>document.getElementById("mainNav").classList.toggle("scrolled",window.scrollY>10));
+// Update API_BASE if the backend is hosted on a different origin
+const API_BASE = 'https://scm-backend-ork4.onrender.com';
+
+// Product images are now stored on Cloudinary as absolute URLs
+// (e.g. https://res.cloudinary.com/.../xyz.jpg), returned as-is unchanged.
+// This function is kept for backward compatibility with any older products
+// that may still have a relative local path saved (e.g. /uploads/...) directly would 404, since that
+// resolves against whatever domain is serving THIS page (e.g. Netlify), not
+// the backend (e.g. Render). This prefixes relative paths with API_BASE while
+// leaving already-absolute URLs (http/https) untouched.
+function scmImgUrl(path){
+  if(!path) return '';
+  return path.startsWith('http') ? path : API_BASE + path;
+}
+const TOKEN_KEY = 'scm_token';
+const USER_CACHE_KEY = 'scm_user';
+function scmGetToken(){ return localStorage.getItem(TOKEN_KEY); }
+function scmIsLoggedIn(){ return !!scmGetToken(); }
+async function scmApiFetch(path, options={}){
+  const token = scmGetToken();
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+  if(token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
+  if(!res.ok){
+    const body = await res.json().catch(()=>({}));
+    throw new Error(body.message || ('Request failed: ' + res.status));
+  }
+  return res.json();
+}
+function scmToast(msg, icon){
+  let t = document.getElementById('scmToast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'scmToast';
+    t.className = 'scm-toast';
+    document.body.appendChild(t);
+  }
+  t.innerHTML = `<i class="fas ${icon || 'fa-circle-check'}"></i> ${msg}`;
+  t.classList.add('show');
+  clearTimeout(window._scmToastTimer);
+  window._scmToastTimer = setTimeout(()=> t.classList.remove('show'), 3200);
+}
+function fmtMoney(n){ return '₹' + Number(n||0).toLocaleString('en-IN'); }
+function fmtDate(iso){
+  if(!iso) return '';
+  return new Date(iso).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function getProductIdFromUrl(){
+  return new URLSearchParams(window.location.search).get('id');
+}
+
+let currentProduct = null;
+let selectedVariant = null;
+
+function changeImg(thumb, url){
+  document.querySelectorAll('.gthumb').forEach(t=>t.classList.remove('active'));
+  thumb.classList.add('active');
+  const main = document.getElementById('galMain');
+  if(url && (url.startsWith('http') || url.startsWith('/'))){
+    main.innerHTML = `<img src="${scmImgUrl(url)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>`;
+  } else {
+    main.textContent = url || '🌶️';
+  }
+}
+function openTab(el, id){
+  document.querySelectorAll('.tab-lnk').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+function selectSize(el, variant){
+  document.querySelectorAll('.sz-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  selectedVariant = variant;
+  renderPrice();
+}
+function renderPrice(){
+  if(!selectedVariant) return;
+  const off = selectedVariant.mrp > selectedVariant.price
+    ? Math.round(100 * (selectedVariant.mrp - selectedVariant.price) / selectedVariant.mrp) + '% OFF'
+    : '';
+  document.getElementById('pdPriceRow').innerHTML = `
+    <span class="price-main">${fmtMoney(selectedVariant.price)}</span>
+    ${selectedVariant.mrp > selectedVariant.price ? `<span class="price-old">${fmtMoney(selectedVariant.mrp)}</span>` : ''}
+    ${off ? `<span class="price-save">${off}</span>` : ''}
+  `;
+  const inStock = (selectedVariant.stock || 0) > 0;
+  document.getElementById('pdStock').innerHTML = inStock
+    ? '<i class="fas fa-check-circle"></i> In Stock — Ships within 24 hours'
+    : '<i class="fas fa-circle-xmark"></i> Out of Stock';
+  document.getElementById('pdStock').style.color = inStock ? '' : '#B5390A';
+}
+
+async function loadProduct(){
+  const id = getProductIdFromUrl();
+  if(!id){
+    showProductError('No product specified.');
+    return;
+  }
+  try {
+    const p = await (await fetch(API_BASE + '/api/products/' + id)).json();
+    if(!p || p.message){ throw new Error(p && p.message || 'Product not found'); }
+    currentProduct = p;
+    renderProduct(p);
+    document.getElementById('pdLoading').style.display = 'none';
+    document.getElementById('pdContent').style.display = 'grid';
+    document.getElementById('pdReviewsWrap').style.display = 'block';
+    document.getElementById('pdRelatedSec').style.display = 'block';
+    loadReviews(id);
+    loadRelated(p.category, id);
+  } catch(err){
+    showProductError(err.message);
+  }
+}
+function showProductError(msg){
+  document.getElementById('pdLoading').style.display = 'none';
+  document.getElementById('pdError').style.display = 'block';
+  document.getElementById('pdErrorMsg').textContent = msg || 'Please check the link and try again.';
+}
+
+function renderProduct(p){
+  document.title = p.name + ' — Product Detail — Sunil Choudhary Masala';
+  document.getElementById('pdBreadcrumbName').textContent = p.name;
+  document.getElementById('pdCategory').textContent = '🌶️ ' + p.category;
+  document.getElementById('pdName').textContent = p.name;
+
+  const rating = p.ratingAvg || 0;
+  document.getElementById('pdStars').textContent = '★'.repeat(Math.round(rating)) + '☆'.repeat(5-Math.round(rating));
+  document.getElementById('pdRatCount').textContent = `${rating.toFixed(1)} · ${p.ratingCount||0} reviews`;
+  document.getElementById('pdSoldCount').textContent = `✔ ${p.totalSold||0} Sold`;
+
+  const images = (p.images && p.images.length) ? p.images : [];
+  const galMain = document.getElementById('galMain');
+  if(images.length){
+    galMain.innerHTML = `<img src="${scmImgUrl(images[0])}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>`;
+  } else {
+    galMain.textContent = '🌶️';
+  }
+  document.getElementById('galThumbs').innerHTML = (images.length ? images : ['🌶️']).map((img, i) => {
+    const isImagePath = img.startsWith('http') || img.startsWith('/');
+    return `<div class="gthumb ${i===0?'active':''}" onclick="changeImg(this, ${isImagePath ? `'${img}'` : `'${img}'`})">${isImagePath ? `<img src="${scmImgUrl(img)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"/>` : img}</div>`;
+  }).join('');
+
+  const variants = p.variants || [];
+  selectedVariant = variants[0] || { price: 0, mrp: 0, stock: 0, weight: '' };
+  document.getElementById('pdSizeOpts').innerHTML = variants.map((v, i) => `
+    <button class="sz-btn ${i===0?'active':''}" onclick='selectSize(this, ${JSON.stringify(v)})'>${v.weight} — ${fmtMoney(v.price)}</button>
+  `).join('');
+  renderPrice();
+
+  document.getElementById('pdBatchInfo').innerHTML = `<i class="fas fa-calendar-alt"></i><span><strong>Batch Date:</strong> ${fmtDate(p.batchDate)}${p.bestBefore ? ' · Best Before: ' + fmtDate(p.bestBefore) : ''}</span>`;
+
+  document.getElementById('pdDescription').textContent = p.description || '';
+  document.getElementById('pdIngredients').textContent = p.ingredients || 'Ingredient information not available.';
+  document.getElementById('pdFssai').textContent = p.fssaiNumber ? `FSSAI Reg. No: ${p.fssaiNumber} · Mfg: Sunil Choudhary Masala, Rajasthan` : '';
+
+  const n = p.nutritionInfo || {};
+  const nutriRows = [
+    ['Energy', n.energy], ['Protein', n.protein], ['Total Fat', n.fat],
+    ['Carbs', n.carbs], ['Dietary Fibre', n.fibre]
+  ].filter(([,v]) => v);
+  document.getElementById('pdNutrition').innerHTML = nutriRows.length
+    ? nutriRows.map(([k,v]) => `<div style="background:var(--cream-dark);padding:8px 12px;border-radius:6px;font-size:13px">${k}: <strong>${v}</strong></div>`).join('')
+    : '<p style="grid-column:1/-1;color:var(--brown);font-size:13px">Nutrition information not available.</p>';
+}
+
+async function loadReviews(productId){
+  try {
+    const reviews = await (await fetch(API_BASE + '/api/reviews/' + productId)).json();
+    const list = reviews.reviews || reviews || [];
+    document.getElementById('pdAvgNum').textContent = (currentProduct.ratingAvg||0).toFixed(1);
+    const r = Math.round(currentProduct.ratingAvg||0);
+    document.getElementById('pdAvgStars').textContent = '★'.repeat(r) + '☆'.repeat(5-r);
+    document.getElementById('pdAvgTotal').textContent = `${currentProduct.ratingCount||0} reviews`;
+    if(!list.length){
+      document.getElementById('pdNoReviews').style.display = 'block';
+      document.getElementById('pdReviewGrid').innerHTML = '';
+      return;
+    }
+    document.getElementById('pdReviewGrid').innerHTML = list.map(rv => `
+      <div class="rev-card">
+        <div class="rev-hdr">
+          <div class="rev-av">${(rv.userName||'?')[0].toUpperCase()}</div>
+          <div>
+            <div class="rev-nm">${rv.userName||'Anonymous'}</div>
+            <div class="rev-dt">${'★'.repeat(rv.rating)}${'☆'.repeat(5-rv.rating)} · ${fmtDate(rv.createdAt)}</div>
+          </div>
+        </div>
+        <p class="rev-txt">${rv.comment}</p>
+      </div>
+    `).join('');
+  } catch(err){
+    document.getElementById('pdReviewGrid').innerHTML = '';
+  }
+}
+
+function showReviewForm(){
+  if(!scmIsLoggedIn()){
+    window.location.href = 'login.html?redirect=product.html' + window.location.search;
+    return;
+  }
+  document.getElementById('pdReviewForm').style.display = 'block';
+}
+
+async function submitReview(){
+  const rating = Number(document.getElementById('pdRevRating').value);
+  const comment = document.getElementById('pdRevComment').value.trim();
+  if(!comment){ scmToast('Please write a comment', 'fa-triangle-exclamation'); return; }
+  try {
+    await scmApiFetch('/api/reviews/' + currentProduct._id, {
+      method: 'POST',
+      body: JSON.stringify({ rating, comment })
+    });
+    scmToast('Review submitted!');
+    document.getElementById('pdRevComment').value = '';
+    document.getElementById('pdReviewForm').style.display = 'none';
+    loadReviews(currentProduct._id);
+  } catch(err){
+    scmToast(err.message || 'Could not submit review', 'fa-triangle-exclamation');
+  }
+}
+
+async function loadRelated(category, excludeId){
+  try {
+    const params = new URLSearchParams({ category });
+    const data = await (await fetch(API_BASE + '/api/products?' + params.toString())).json();
+    const products = (data.products || data || []).filter(p => p._id !== excludeId).slice(0, 4);
+    document.getElementById('pdRelatedGrid').innerHTML = products.map(p => {
+      const v = (p.variants && p.variants[0]) || { price: 0 };
+      const img = (p.images && p.images[0]) ? `<img src="${scmImgUrl(p.images[0])}" style="width:100%;height:100%;object-fit:cover"/>` : '🌶️';
+      return `<div class="prod-card">
+        <div class="prod-img" style="font-size:60px;cursor:pointer" onclick="window.location.href='product.html?id=${p._id}'">${img}</div>
+        <div class="prod-body">
+          <div class="prod-cat">${p.category}</div>
+          <div class="prod-name">${p.name}</div>
+          <div class="prod-footer">
+            <span class="prod-price">${fmtMoney(v.price)}</span>
+            <button class="btn-cart" onclick="quickAddToCart('${p._id}', '${v.weight||''}')"><i class="fas fa-plus"></i></button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(err){ /* non-critical */ }
+}
+
+async function addToCart(){
+  if(!scmIsLoggedIn()){
+    window.location.href = 'login.html?redirect=product.html' + window.location.search;
+    return;
+  }
+  const qty = Number(document.getElementById('qty').textContent) || 1;
+  try {
+    const updatedCart = await scmApiFetch('/api/cart', {
+      method: 'POST',
+      body: JSON.stringify({ productId: currentProduct._id, weight: selectedVariant.weight, quantity: qty })
+    });
+    const count = (updatedCart.items || []).reduce((s, it) => s + (it.quantity || 0), 0);
+    if(window.scmSetCartCount) window.scmSetCartCount(count);
+    scmToast(`${qty} item${qty>1?'s':''} added to cart`, 'fa-cart-shopping');
+  } catch(err){
+    scmToast(err.message || 'Could not add to cart', 'fa-triangle-exclamation');
+  }
+}
+async function quickAddToCart(productId, weight){
+  if(!scmIsLoggedIn()){
+    window.location.href = 'login.html?redirect=product.html';
+    return;
+  }
+  try {
+    const updatedCart = await scmApiFetch('/api/cart', { method: 'POST', body: JSON.stringify({ productId, weight, quantity: 1 }) });
+    const count = (updatedCart.items || []).reduce((s, it) => s + (it.quantity || 0), 0);
+    if(window.scmSetCartCount) window.scmSetCartCount(count);
+    scmToast('1 item added to cart', 'fa-cart-shopping');
+  } catch(err){
+    scmToast(err.message || 'Could not add to cart', 'fa-triangle-exclamation');
+  }
+}
+async function buyNow(){
+  await addToCart();
+  window.location.href = 'cart.html';
+}
+async function toggleWish(){
+  if(!scmIsLoggedIn()){
+    window.location.href = 'login.html?redirect=product.html' + window.location.search;
+    return;
+  }
+  const btn = document.getElementById('pdWishBtn');
+  const icon = btn.querySelector('i');
+  const isWished = icon.classList.contains('fas');
+  try {
+    if(isWished){
+      await scmApiFetch('/api/wishlist/' + currentProduct._id, { method: 'DELETE' });
+    } else {
+      await scmApiFetch('/api/wishlist/' + currentProduct._id, { method: 'POST' });
+    }
+    icon.classList.toggle('far');
+    icon.classList.toggle('fas');
+    scmToast(isWished ? 'Removed from wishlist' : 'Added to wishlist');
+  } catch(err){
+    scmToast(err.message || 'Could not update wishlist', 'fa-triangle-exclamation');
+  }
+}
+
+loadProduct();
+</script>

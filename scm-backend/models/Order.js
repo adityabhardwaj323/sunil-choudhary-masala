@@ -35,7 +35,9 @@ const orderSchema = new mongoose.Schema({
     city: String,
     state: String,
     pincode: String,
-    addressType: String
+    addressType: String,
+    latitude: Number,   // map pin location, set via Leaflet/OpenStreetMap picker at checkout
+    longitude: Number
   },
   paymentMethod: {
     type: String,
@@ -47,6 +49,16 @@ const orderSchema = new mongoose.Schema({
     enum: ['Pending', 'Paid', 'Failed', 'Refunded'],
     default: 'Pending'
   },
+  refundStatus: {
+    type: String,
+    enum: ['NotRequired', 'Processing', 'Refunded', 'Failed'],
+    default: 'NotRequired'
+  },
+  razorpayRefundId: String,
+  refundAmount: Number,
+  refundInitiatedAt: Date,
+  refundProcessedAt: Date,
+  refundFailureReason: String,
   razorpayOrderId: String,
   razorpayPaymentId: String,
   razorpaySignature: String,
@@ -72,6 +84,9 @@ const orderSchema = new mongoose.Schema({
       date: { type: Date, default: Date.now }
     }
   ],
+
+  // Tracks which email events have been sent to prevent duplicates
+  emailNotificationHistory: [{ type: String }],
 
   createdAt: {
     type: Date,

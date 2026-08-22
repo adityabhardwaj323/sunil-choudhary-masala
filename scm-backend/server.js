@@ -5,6 +5,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 
 // Connect to MongoDB database
@@ -13,12 +15,33 @@ connectDB();
 const app = express();
 
 // MIDDLEWARE
-app.use(cors()); // allows our frontend (HTML files) to talk to this backend
-app.use(express.json()); // allows server to understand JSON data sent from frontend
-app.use(express.urlencoded({ extended: true }));
+app.use(helmet({
+  crossOriginResourcePolicy: false, // allow cross-origin images (Cloudinary)
+}));
 
-// Serve uploaded product images publicly
-app.use('/uploads', express.static('uploads'));
+// Global Rate Limiting - generous for regular browsing
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many requests from this IP, please try again later.' }
+});
+app.use('/api', globalLimiter);
+
+app.use(cors()); // allows our frontend (HTML files) to talk to this backend
+// We must handle the Razorpay webhook BEFORE express.json() parses the body,
+// because Razorpay signature validation requires the raw request body string.
+app.post('/api/orders/webhook', express.raw({ type: 'application/json' }), require('./controllers/orderController').razorpayWebhook);
+
+// Apply sensible body size limits (e.g., 1mb instead of 10kb to allow large arrays like cart or long reviews, while blocking giant payloads)
+app.use(express.json({ limit: '1mb' })); // allows server to understand JSON data sent from frontend
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// NOTE: product images are stored on Cloudinary now (see config/cloudinary.js
+// and controllers/productController.js), not on local disk, so there's no
+// local /uploads folder to serve anymore — Render's filesystem is ephemeral
+// and would have wiped locally-stored images on every redeploy anyway.
 
 // ROUTES — each feature has its own file
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -32,6 +55,10 @@ app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/banners', require('./routes/bannerRoutes'));
 app.use('/api/settings', require('./routes/settingsRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/gallery', require('./routes/galleryRoutes'));
+app.use('/api/blog', require('./routes/blogRoutes'));
+app.use('/api/location', require('./routes/locationRoutes'));
 
 // Test route — visit http://localhost:5000/ to check if server is running
 app.get('/', (req, res) => {

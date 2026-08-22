@@ -9,6 +9,16 @@ const { protect, adminOnly } = require('../middleware/auth');
 
 // @route  GET /api/users  (ADMIN ONLY)
 // @desc   Get all customers with their order counts
+const { getAddresses, addAddress, updateAddress, deleteAddress, setDefaultAddress } = require('../controllers/userController');
+
+// Customer Address Routes (Protected, but not admin only)
+router.get('/addresses', protect, getAddresses);
+router.post('/addresses', protect, addAddress);
+router.put('/addresses/:id', protect, updateAddress);
+router.delete('/addresses/:id', protect, deleteAddress);
+router.put('/addresses/:id/default', protect, setDefaultAddress);
+
+// Admin Routes below
 router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const users = await User.find({ role: 'customer' })

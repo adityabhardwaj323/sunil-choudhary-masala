@@ -17,7 +17,7 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Red Chilli', 'Turmeric', 'Coriander', 'Spice Blends', 'Special Masala', 'Gift Box']
+    enum: ['Chilli Powders', 'Ground Spices', 'Dry Fruits & Nuts', 'Healthy Snacks', 'Cooking Oils']
   },
   images: [
     {

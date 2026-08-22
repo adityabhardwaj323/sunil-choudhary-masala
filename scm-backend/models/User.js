@@ -3,6 +3,7 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -50,6 +51,8 @@ const userSchema = new mongoose.Schema({
       state: String,
       pincode: String,
       phone: String,
+      latitude: Number,   // map pin location, set via Leaflet/OpenStreetMap picker on the frontend
+      longitude: Number,
       isDefault: { type: Boolean, default: false }
     }
   ],
@@ -63,6 +66,16 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  passwordResetOtpHash: String,
+  passwordResetOtpExpires: Date,
+  passwordResetOtpAttempts: {
+    type: Number,
+    default: 0
+  },
+  passwordResetOtpLastSentAt: Date,
+  passwordResetVerifiedAt: Date,
+  passwordResetAuthTokenHash: String,
+  passwordResetAuthTokenExpires: Date,
   createdAt: {
     type: Date,
     default: Date.now
@@ -80,6 +93,40 @@ userSchema.pre('save', async function (next) {
 // Method to check if entered password matches the hashed password
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Generate and hash OTP
+userSchema.methods.generatePasswordResetOtp = function () {
+  // Generate 6 digit OTP (string to keep leading zeros)
+  const otp = crypto.randomInt(100000, 1000000).toString().padStart(6, '0');
+
+  // Hash OTP and set to passwordResetOtpHash field
+  this.passwordResetOtpHash = crypto.createHash('sha256').update(otp).digest('hex');
+
+  // Set expire (10 minutes)
+  this.passwordResetOtpExpires = Date.now() + 10 * 60 * 1000;
+  
+  // Reset attempts
+  this.passwordResetOtpAttempts = 0;
+  
+  // Set last sent
+  this.passwordResetOtpLastSentAt = Date.now();
+
+  return otp;
+};
+
+// Generate auth token after successful OTP
+userSchema.methods.generatePasswordResetAuthToken = function () {
+  // Generate secure token
+  const authToken = crypto.randomBytes(32).toString('hex');
+  
+  // Hash token
+  this.passwordResetAuthTokenHash = crypto.createHash('sha256').update(authToken).digest('hex');
+  
+  // Set short expire (e.g. 15 minutes to allow typing new password)
+  this.passwordResetAuthTokenExpires = Date.now() + 15 * 60 * 1000;
+  
+  return authToken;
 };
 
 module.exports = mongoose.model('User', userSchema);
