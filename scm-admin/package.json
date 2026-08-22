@@ -19,6 +19,7 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.15.13",
     "@tailwindcss/typography": "^0.5.20",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^20.17.16",
