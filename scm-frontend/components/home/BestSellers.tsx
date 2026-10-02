@@ -5,12 +5,17 @@ import { FadeIn } from '@/components/motion/FadeIn';
 import { StaggerChildren } from '@/components/motion/StaggerChildren';
 import { MotionItem } from '@/components/motion/MotionItem';
 
+import { ViewItemListTracker } from '@/components/seo/AnalyticsTracker';
+
 export default async function BestSellers() {
   let products: any[] = [];
   try {
     const res = await fetchProducts({ bestseller: 'true' });
-    // limit to 4 for desktop
-    products = res.products.slice(0, 4);
+    products = res?.products?.slice(0, 4) || [];
+    if (products.length === 0) {
+      const allRes = await fetchProducts();
+      products = allRes?.products?.slice(0, 4) || [];
+    }
   } catch (error) {
     console.error('Failed to fetch bestsellers:', error);
   }
@@ -21,6 +26,7 @@ export default async function BestSellers() {
 
   return (
     <section className="py-20 bg-white">
+      <ViewItemListTracker products={products} listName="Homepage Best Sellers" />
       <FadeIn className="container mx-auto px-4 max-w-7xl">
         <div className="text-center mb-12 flex flex-col items-center">
           <span className="font-kalam text-brand-red text-xl mb-2">Most Loved</span>

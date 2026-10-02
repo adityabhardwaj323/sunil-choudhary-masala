@@ -42,3 +42,16 @@ export interface ProductsResponse {
   count: number;
   products: Product[];
 }
+
+export interface BlogPost {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content: string;
+  category?: string;
+  featuredImageUrl?: string;
+  publishedAt?: string;
+  createdAt?: string;
+  status?: string;
+}

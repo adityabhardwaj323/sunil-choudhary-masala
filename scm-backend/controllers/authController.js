@@ -4,6 +4,7 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
+const { sendEmail } = require('../utils/sendEmail');
 
 // Helper: Creates a JWT token for a user (valid for 30 days by default)
 const generateToken = (id) => {
@@ -45,7 +46,7 @@ const register = async (req, res) => {
     if (user.email) {
       try {
         const { welcomeEmail } = require('../utils/emailTemplates');
-        const sendEmail = require('../utils/sendEmail');
+        const { sendEmail } = require('../utils/sendEmail');
         await sendEmail({
           email: user.email,
           subject: 'Welcome to Sunil Choudhary Masala!',
@@ -92,6 +93,22 @@ const login = async (req, res) => {
 
     if (user.isBlocked) {
       return res.status(403).json({ message: 'Your account has been blocked. Contact support.' });
+    }
+
+    // Send login confirmation email asynchronously
+    if (user.email) {
+      try {
+        const { loginConfirmationEmail } = require('../utils/emailTemplates');
+        // Note: we do not await this, we don't want a failed email to block the login
+        sendEmail({
+          email: user.email,
+          subject: 'Security Alert: New Login to SCM',
+          message: 'Your account was just accessed.',
+          html: loginConfirmationEmail(user.firstName)
+        }).catch(err => console.error('Login email failure:', err.message));
+      } catch (err) {
+        console.error('Login email template error:', err.message);
+      }
     }
 
     res.json({
@@ -196,8 +213,6 @@ const updateProfile = async (req, res) => {
   }
 };
 
-const sendEmail = require('../utils/sendEmail');
-
 // @route   POST /api/auth/forgot-password
 // @desc    Request OTP for password reset
 const forgotPassword = async (req, res) => {
@@ -235,13 +250,14 @@ const forgotPassword = async (req, res) => {
         html: `<p>Your password reset OTP is: <strong>${otp}</strong></p><p>It expires in 10 minutes.</p>`
       });
     } catch (emailError) {
-      // If email fails, don't expose it to the user, just log in production
+      console.error('SMTP Failure in forgotPassword:', emailError.message);
       // Reset the OTP fields so they can try again
       user.passwordResetOtpHash = undefined;
       user.passwordResetOtpExpires = undefined;
       user.passwordResetOtpAttempts = undefined;
       user.passwordResetOtpLastSentAt = undefined;
       await user.save({ validateBeforeSave: false });
+      return res.status(500).json({ message: 'Email service is currently unavailable. Please try again later.' });
     }
 
     res.status(200).json({ message: successMsg });
@@ -284,11 +300,13 @@ const resendResetOtp = async (req, res) => {
         html: `<p>Your new password reset OTP is: <strong>${otp}</strong></p><p>It expires in 10 minutes.</p>`
       });
     } catch (emailError) {
+      console.error('SMTP Failure in resendResetOtp:', emailError.message);
       user.passwordResetOtpHash = undefined;
       user.passwordResetOtpExpires = undefined;
       user.passwordResetOtpAttempts = undefined;
       user.passwordResetOtpLastSentAt = undefined;
       await user.save({ validateBeforeSave: false });
+      return res.status(500).json({ message: 'Email service is currently unavailable. Please try again later.' });
     }
 
     res.status(200).json({ message: successMsg });
@@ -390,6 +408,21 @@ const resetPassword = async (req, res) => {
     user.passwordResetAuthTokenExpires = undefined;
     
     await user.save();
+
+    // Send password changed confirmation email asynchronously
+    if (user.email) {
+      try {
+        const { passwordChangedEmail } = require('../utils/emailTemplates');
+        sendEmail({
+          email: user.email,
+          subject: 'Security Alert: Password Changed',
+          message: 'Your SCM password was successfully updated.',
+          html: passwordChangedEmail(user.firstName)
+        }).catch(err => console.error('Password changed email failure:', err.message));
+      } catch (err) {
+        console.error('Password changed email template error:', err.message);
+      }
+    }
 
     res.status(200).json({ message: 'Password reset successful' });
   } catch (error) {

@@ -7,6 +7,9 @@ const { protect, adminOnly } = require('../middleware/auth');
 // Admin: get ALL reviews across all products
 router.get('/', protect, adminOnly, getAllReviews);
 
+// Customer: get recent approved reviews for homepage
+router.get('/public/recent', require('../controllers/reviewController').getRecentPublicReviews);
+
 // Customer: get approved reviews for a specific product
 router.get('/:productId', getProductReviews);
 

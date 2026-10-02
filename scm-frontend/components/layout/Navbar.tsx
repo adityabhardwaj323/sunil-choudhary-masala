@@ -82,9 +82,9 @@ export default function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean })
             <Image 
               src="/asset_0.png" 
               alt="Sunil Choudhary Masala" 
-              width={160} 
-              height={45} 
-              className="object-contain h-[45px] w-auto transition-opacity group-hover:opacity-90"
+              width={357} 
+              height={237} 
+              className="h-[45px] w-auto object-contain transition-opacity group-hover:opacity-90"
               priority
             />
           </Link>
@@ -189,47 +189,45 @@ export default function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean })
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
-              className="lg:hidden bg-white border-t border-cream-dark overflow-hidden"
+              className="lg:hidden bg-white border-t border-cream-dark overflow-hidden pb-4"
             >
-          <div className="px-5 flex flex-col gap-2">
-            <form onSubmit={handleSearch} className="flex w-full mb-2">
-              <input 
-                type="text"
-                placeholder="Search spices..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 h-12 bg-cream border-[1.5px] border-cream-dark rounded-l-[10px] pl-4 pr-2 text-[15px] font-body text-charcoal placeholder:text-brown/60 focus:outline-none focus:border-brand-red"
-              />
-              <button 
-                type="submit" 
-                aria-label="Search"
-                className="h-12 px-5 bg-brand-red text-white rounded-r-[10px]"
-              >
-                <Search size={20} />
-              </button>
-            </form>
+              <div className="px-5 py-4 flex flex-col gap-6">
+                
+                {/* SHOP */}
+                <div>
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Shop</div>
+                  <div className="flex flex-col gap-3">
+                    <Link href="/shop" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>All Masalas</Link>
+                    <Link href="/shop?filter=bestsellers" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>Best Sellers</Link>
+                    <Link href="/shop?category=Combos" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>Combos</Link>
+                  </div>
+                </div>
 
-            <div className="flex flex-col">
-              {[...navLinks, { name: 'Wishlist', href: '/wishlist' }, { name: 'Account', href: isLoggedIn ? '/account' : '/login' }].map((link) => (
-                <Link 
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="font-body text-[16px] font-medium text-charcoal py-3.5 border-b border-cream-dark last:border-none transition-colors hover:text-brand-red flex items-center justify-between"
-                >
-                  {link.name}
-                  {link.name === 'Wishlist' && wishlistCount > 0 && (
-                    <span className="bg-brand-red text-white text-[11px] font-bold rounded-full w-5 h-5 flex items-center justify-center">{wishlistCount}</span>
-                  )}
+                {/* OUR STORY */}
+                <div>
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Our Story</div>
+                  <div className="flex flex-col gap-3">
+                    <Link href="/about" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>Our Story</Link>
+                    <Link href="/manufacturing" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>Our Process</Link>
+                  </div>
+                </div>
+
+                {/* HELP */}
+                <div>
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Help</div>
+                  <div className="flex flex-col gap-3">
+                    <Link href="/tracking" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>Track Order</Link>
+                    <Link href="/faq" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>FAQ</Link>
+                    <Link href="/contact" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>Contact</Link>
+                  </div>
+                </div>
+                
+                <Link href="/shop?filter=bestsellers" onClick={() => setMobileOpen(false)} className="bg-brand-red text-white py-3.5 rounded-xl font-bold flex justify-center mt-2">
+                  SHOP BESTSELLERS
                 </Link>
-              ))}
-            </div>
 
-            <Link href="/shop" onClick={() => setMobileOpen(false)} className="w-full mt-2 bg-brand-red text-white hover:bg-brand-red-dark hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(181,57,10,0.4)] rounded-[6px] inline-flex items-center justify-center font-body font-semibold transition-all duration-250 py-3.5 text-[16px]">
-              Order Now
-            </Link>
-          </div>
-        </motion.div>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </nav>

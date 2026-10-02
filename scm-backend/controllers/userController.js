@@ -19,6 +19,21 @@ const addAddress = async (req, res) => {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    const { latitude, longitude, accuracy } = req.body;
+    if (latitude !== undefined || longitude !== undefined) {
+      if (typeof latitude !== 'number' || latitude < -90 || latitude > 90 || Number.isNaN(latitude)) {
+        return res.status(400).json({ message: 'Invalid latitude' });
+      }
+      if (typeof longitude !== 'number' || longitude < -180 || longitude > 180 || Number.isNaN(longitude)) {
+        return res.status(400).json({ message: 'Invalid longitude' });
+      }
+    }
+    if (accuracy !== undefined) {
+      if (typeof accuracy !== 'number' || accuracy < 0 || Number.isNaN(accuracy)) {
+        return res.status(400).json({ message: 'Invalid accuracy' });
+      }
+    }
+
     const newAddress = {
       label: req.body.label || 'Home',
       addressLine1: req.body.addressLine1,
@@ -27,8 +42,9 @@ const addAddress = async (req, res) => {
       state: req.body.state,
       pincode: req.body.pincode,
       phone: req.body.phone,
-      latitude: req.body.latitude,
-      longitude: req.body.longitude,
+      latitude,
+      longitude,
+      accuracy,
       isDefault: req.body.isDefault || false
     };
 
@@ -61,6 +77,23 @@ const updateAddress = async (req, res) => {
     const address = user.addresses.id(req.params.id);
     if (!address) return res.status(404).json({ message: 'Address not found' });
 
+    const { latitude, longitude, accuracy } = req.body;
+    if (latitude !== undefined || longitude !== undefined) {
+      const lat = latitude !== undefined ? latitude : address.latitude;
+      const lng = longitude !== undefined ? longitude : address.longitude;
+      if (lat !== undefined && (typeof lat !== 'number' || lat < -90 || lat > 90 || Number.isNaN(lat))) {
+        return res.status(400).json({ message: 'Invalid latitude' });
+      }
+      if (lng !== undefined && (typeof lng !== 'number' || lng < -180 || lng > 180 || Number.isNaN(lng))) {
+        return res.status(400).json({ message: 'Invalid longitude' });
+      }
+    }
+    if (accuracy !== undefined) {
+      if (typeof accuracy !== 'number' || accuracy < 0 || Number.isNaN(accuracy)) {
+        return res.status(400).json({ message: 'Invalid accuracy' });
+      }
+    }
+
     if (req.body.label) address.label = req.body.label;
     if (req.body.addressLine1) address.addressLine1 = req.body.addressLine1;
     if (req.body.addressLine2 !== undefined) address.addressLine2 = req.body.addressLine2;
@@ -68,8 +101,9 @@ const updateAddress = async (req, res) => {
     if (req.body.state) address.state = req.body.state;
     if (req.body.pincode) address.pincode = req.body.pincode;
     if (req.body.phone) address.phone = req.body.phone;
-    if (req.body.latitude !== undefined) address.latitude = req.body.latitude;
-    if (req.body.longitude !== undefined) address.longitude = req.body.longitude;
+    if (latitude !== undefined) address.latitude = latitude;
+    if (longitude !== undefined) address.longitude = longitude;
+    if (accuracy !== undefined) address.accuracy = accuracy;
 
     if (req.body.isDefault) {
       user.addresses.forEach(addr => (addr.isDefault = false));

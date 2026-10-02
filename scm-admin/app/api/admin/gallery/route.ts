@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000';
 
 export async function GET(req: NextRequest) {
   try {
-    const response = await fetch(`/api/gallery`);
+    const response = await fetch(`${API_BASE_URL}/api/gallery`);
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error: any) {
@@ -14,14 +14,26 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.cookies.get('admin_jwt')?.value || req.headers.get('authorization');
-    const formData = await req.formData();
-    const response = await fetch(`/api/gallery`, {
+    const cookieToken = req.cookies.get('admin_jwt')?.value;
+    const headerAuth = req.headers.get('authorization');
+    let finalAuth = '';
+    
+    if (cookieToken) {
+      finalAuth = `Bearer ${cookieToken}`;
+    } else if (headerAuth) {
+      finalAuth = headerAuth.startsWith('Bearer ') ? headerAuth : `Bearer ${headerAuth}`;
+    }
+
+    const contentTypeReq = req.headers.get('content-type') || '';
+    const bodyBuffer = await req.arrayBuffer();
+    
+    const response = await fetch(`${API_BASE_URL}/api/gallery`, {
       method: 'POST',
       headers: {
-        ...(token ? { 'Authorization': token } : {})
+        ...(finalAuth ? { 'Authorization': finalAuth } : {}),
+        'Content-Type': contentTypeReq
       },
-      body: formData
+      body: bodyBuffer
     });
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });

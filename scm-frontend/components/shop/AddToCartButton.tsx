@@ -12,8 +12,9 @@ interface AddToCartButtonProps {
 
 import { useCartWishlist } from '@/context/CartWishlistContext';
 import { ShoppingBag } from 'lucide-react';
+import { trackAddToCart } from '@/lib/analytics';
 
-export default function AddToCartButton({ productId, variantId, weight, className = 'bg-charcoal text-white hover:bg-brand-red transition-colors flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm shadow-sm hover:shadow-md w-full', children }: AddToCartButtonProps) {
+export default function AddToCartButton({ productId, variantId, weight, className = 'bg-charcoal text-white hover:bg-brand-red transition-colors flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm shadow-sm hover:shadow-md w-full', children, price = 0, productName = '' }: AddToCartButtonProps & { price?: number, productName?: string }) {
   const { refreshCart } = useCartWishlist();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
@@ -40,6 +41,8 @@ export default function AddToCartButton({ productId, variantId, weight, classNam
       
       if (res.ok) {
         refreshCart();
+        // Fire analytics
+        trackAddToCart({ _id: productId, name: productName }, 1, price);
         alert('Added to cart!');
       } else {
         const body = await res.json().catch(() => ({}));

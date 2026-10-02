@@ -1,10 +1,11 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { Loader2, Calendar, User, Tag, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, useParams } from 'next/navigation';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface BlogPost {
   _id: string;
@@ -27,7 +28,7 @@ export default function BlogDetailPage() {
   useEffect(() => {
     if (!params.slug) return;
     
-    fetch(`/api/blog/`)
+    fetch(`/api/blog/${params.slug}`)
       .then(res => {
         if (!res.ok) throw new Error('Not found');
         return res.json();
@@ -94,7 +95,7 @@ export default function BlogDetailPage() {
           <div className="p-8 md:p-12">
             <div 
               className="prose prose-stone prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: blog.content }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
             />
             
             {blog.tags && blog.tags.length > 0 && (

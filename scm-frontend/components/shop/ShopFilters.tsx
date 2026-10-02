@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -42,6 +42,7 @@ export default function ShopFilters() {
               { label: 'Dry Fruits & Nuts', value: 'Dry Fruits & Nuts' },
               { label: 'Healthy Snacks', value: 'Healthy Snacks' },
               { label: 'Cooking Oils', value: 'Cooking Oils' },
+              { label: 'Combos', value: 'Combos' },
             ].map((cat) => (
               <label key={cat.label} className="flex items-center gap-3 cursor-pointer group">
                 <div className="relative flex items-center justify-center">

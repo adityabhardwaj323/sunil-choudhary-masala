@@ -1,163 +1,205 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, TouchEvent } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ShoppingBag, ArrowRight, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { FadeIn } from '@/components/motion/FadeIn';
 
 const slides = [
   {
-    eyebrow: "✦ Since 1985 · Rajasthan",
+    eyebrow: "Traditional Rajasthani Spices",
+    headingText: "Authentic Rajasthani Masalas",
     headline: (
       <>
-        The True Taste of<br />
-        <em className="text-gold-light not-italic">Rajasthani Masala</em>
+        Authentic Rajasthani<br />
+        <em className="text-gold-light not-italic">Masalas</em>
       </>
     ),
-    text: "Hand-picked spices, stone-ground the traditional way. Every batch dated. Every packet sealed with purity.",
-    cta1: { label: "Shop Now", link: "/shop", icon: <ShoppingBag size={18} /> },
-    cta2: { label: "Our Story", link: "/about", icon: <ArrowRight size={18} /> },
+    text: "Traditional spices and masala blends for everyday Indian cooking.",
+    cta1: { label: "Shop Bestsellers", link: "/shop?filter=bestsellers", icon: <ShoppingBag size={18} /> },
     image: "/images/hero_1_true_taste.jpg",
   },
   {
-    eyebrow: "✦ 100% Natural · No Additives",
+    eyebrow: "Everyday Kitchen Essentials",
+    headingText: "Pure Flavours, Traditional Recipes",
     headline: (
       <>
-        Pure Spices,<br />
-        <em className="text-gold-light not-italic">No Shortcuts</em>
+        Pure Flavours,<br />
+        <em className="text-gold-light not-italic">Traditional Recipes</em>
       </>
     ),
-    text: "No artificial colours. No preservatives. Just the real flavour of freshly ground Rajasthani spices — nothing more.",
-    cta1: { label: "Explore Range", link: "/shop", icon: <ShoppingBag size={18} /> },
-    cta2: { label: "Quality Promise", link: "/quality-standards", icon: <ArrowRight size={18} /> },
+    text: "Discover staple spices and blends made for everyday cooking.",
+    cta1: { label: "Explore Range", link: "/shop", icon: <ArrowRight size={18} /> },
     image: "/images/hero_2_pure_spices.jpg",
   },
   {
-    eyebrow: "✦ Signature Blends",
+    eyebrow: "Signature Heritage Blends",
+    headingText: "Time-Tested Family Recipes",
     headline: (
       <>
-        Secret Blends from<br />
-        <em className="text-gold-light not-italic">Three Generations</em>
+        Time-Tested<br />
+        <em className="text-gold-light not-italic">Family Recipes</em>
       </>
     ),
-    text: "Our special masala recipes have been passed down through the Choudhary family for over 35 years — now in your kitchen.",
-    cta1: { label: "Best Sellers", link: "/shop", icon: <ShoppingBag size={18} /> },
-    cta2: { label: "Gift Packs", link: "/shop", icon: <Gift size={18} /> },
+    text: "Explore signature spice blends inspired by traditional cooking.",
+    cta1: { label: "Shop Bestsellers", link: "/shop?filter=bestsellers", icon: <ShoppingBag size={18} /> },
     image: "/images/hero_3_secret_blends.jpg",
   },
   {
-    eyebrow: "✦ First Order Special",
+    eyebrow: "Special Welcome Offer",
+    headingText: "10% Off Your First Order",
     headline: (
       <>
-        Get 10% Off<br />
-        <em className="text-gold-light not-italic">Your First Order</em>
+        10% Off Your<br />
+        <em className="text-gold-light not-italic">First Order</em>
       </>
     ),
-    text: "Use code PEHLADABBA at checkout and experience authentic Rajasthani flavour delivered to your door.",
-    cta1: { label: "Claim Offer", link: "/shop", icon: <ShoppingBag size={18} /> },
-    cta2: null,
+    text: "Use coupon code PEHLADABBA at checkout on your first order.",
+    cta1: { label: "Claim Offer", link: "/shop", icon: <Gift size={18} /> },
     image: "/images/hero_4_first_order.jpg",
   }
 ];
 
 export default function Hero() {
   const [current, setCurrent] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   useEffect(() => {
-    if (isHovered) return;
+    if (isPaused) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, [isHovered]);
+  }, [isPaused]);
 
   const nextSlide = () => setCurrent((prev) => (prev + 1) % slides.length);
   const prevSlide = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
 
+  const handleTouchStart = (e: TouchEvent<HTMLElement>) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = null;
+    setIsPaused(true);
+  };
+
+  const handleTouchMove = (e: TouchEvent<HTMLElement>) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      const diffX = touchStartX.current - touchEndX.current;
+      const minSwipeDistance = 45;
+      if (diffX > minSwipeDistance) {
+        nextSlide();
+      } else if (diffX < -minSwipeDistance) {
+        prevSlide();
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+    setIsPaused(false);
+  };
+
   return (
     <section
-      className="relative w-full h-[520px] md:h-[580px] overflow-hidden"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative w-full h-[520px] md:h-[580px] overflow-hidden select-none"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      aria-roledescription="carousel"
+      aria-label="Highlighted Offers and Products"
     >
       {/* Slides track */}
       <div
-        className="flex h-full transition-transform duration-700 ease-in-out"
+        className="flex flex-row flex-nowrap w-full h-full transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
         {slides.map((slide, index) => (
-          <div key={index} className="relative min-w-full h-full flex items-center">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url('${slide.image}')` }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-charcoal/20" />
+          <div 
+            key={index} 
+            className="relative w-full min-w-full shrink-0 h-full flex items-center"
+            aria-roledescription="slide"
+            aria-label={`${index + 1} of ${slides.length}: ${slide.headingText}`}
+            aria-hidden={index !== current}
+          >
+            {/* Slide Background Image */}
+            <div className="absolute inset-0 z-0">
+              <Image
+                src={slide.image}
+                alt={slide.headingText}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className="object-cover object-center"
+              />
+            </div>
+            
+            {/* Gradient Overlays for Readability and Contrast */}
+            <div className="absolute inset-0 z-1 bg-gradient-to-r from-charcoal/90 via-charcoal/65 to-charcoal/20" />
+            <div className="absolute inset-0 z-1 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent md:hidden" />
 
+            {/* Slide Content */}
             <div className="relative z-10 max-w-[600px] px-6 md:px-20">
               <FadeIn delay={0.2}>
-              <span className="font-kalam text-gold-light text-base md:text-lg tracking-wide mb-3 block">
-                {slide.eyebrow}
-              </span>
-              <h1 className="font-playfair text-[32px] md:text-[54px] text-white leading-[1.15] mb-4 font-bold">
-                {slide.headline}
-              </h1>
-              <p className="text-white/85 text-base leading-relaxed mb-7 max-w-[440px]">
-                {slide.text}
-              </p>
-              <div className="flex gap-3.5 flex-wrap">
-                <Link href={slide.cta1.link}>
-                  <Button variant="primary" className="flex items-center gap-2">
+                <span className="font-kalam text-gold-light text-base md:text-lg tracking-wide mb-3 block">
+                  ✦ {slide.eyebrow}
+                </span>
+                <h1 className="font-playfair text-[32px] md:text-[54px] text-white leading-[1.15] mb-4 font-bold">
+                  {slide.headline}
+                </h1>
+                <p className="text-white/85 text-sm md:text-base leading-relaxed mb-7 max-w-[440px]">
+                  {slide.text}
+                </p>
+                <div className="flex gap-3.5 flex-wrap">
+                  <Link
+                    href={slide.cta1.link}
+                    tabIndex={index === current ? 0 : -1}
+                    className="bg-brand-red text-white px-7 py-3.5 hover:bg-brand-red-dark hover:-translate-y-0.5 text-[15px] rounded-[6px] font-body font-semibold inline-flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
+                  >
                     {slide.cta1.icon}
                     {slide.cta1.label}
-                  </Button>
-                </Link>
-                {slide.cta2 && (
-                  <Link href={slide.cta2.link}>
-                    <Button
-                      variant="secondary"
-                      className="text-white border-white/60 hover:bg-white/15 hover:border-white hover:text-white flex items-center gap-2"
-                    >
-                      {slide.cta2.label}
-                    </Button>
                   </Link>
-                )}
-              </div>
-            </FadeIn>
+                </div>
+              </FadeIn>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Arrows */}
-      <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-5 z-20">
-        <button
-          onClick={prevSlide}
-          className="w-12 h-12 rounded-full bg-white/20 border-2 border-white/40 text-white backdrop-blur-sm flex items-center justify-center hover:bg-brand-red hover:border-brand-red transition-all"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="w-12 h-12 rounded-full bg-white/20 border-2 border-white/40 text-white backdrop-blur-sm flex items-center justify-center hover:bg-brand-red hover:border-brand-red transition-all"
-          aria-label="Next slide"
-        >
-          <ChevronRight size={20} />
-        </button>
-      </div>
+      {/* Manual Navigation Arrows (Directly Positioned with z-30) */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-charcoal/60 border border-white/40 text-white backdrop-blur-sm flex items-center justify-center hover:bg-brand-red hover:border-brand-red transition-all focus:outline-none focus:ring-2 focus:ring-gold-light shadow-md"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft size={20} />
+      </button>
+      <button
+        onClick={nextSlide}
+        className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-charcoal/60 border border-white/40 text-white backdrop-blur-sm flex items-center justify-center hover:bg-brand-red hover:border-brand-red transition-all focus:outline-none focus:ring-2 focus:ring-gold-light shadow-md"
+        aria-label="Next slide"
+      >
+        <ChevronRight size={20} />
+      </button>
 
-      {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-20">
-        {slides.map((_, idx) => (
+      {/* Slide Indicator Dots */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-30" role="tablist" aria-label="Slides">
+        {slides.map((slide, idx) => (
           <button
             key={idx}
+            role="tab"
+            aria-selected={idx === current}
             onClick={() => setCurrent(idx)}
-            className={`h-2.5 rounded-full transition-all duration-300 ${
-              idx === current ? 'w-7 bg-white' : 'w-2.5 bg-white/40 hover:bg-white/70'
+            className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gold-light ${
+              idx === current ? 'w-8 bg-gold-light' : 'w-2.5 bg-white/40 hover:bg-white/70'
             }`}
-            aria-label={`Go to slide ${idx + 1}`}
+            aria-label={`Go to slide ${idx + 1}: ${slide.headingText}`}
           />
         ))}
       </div>

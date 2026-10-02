@@ -44,15 +44,16 @@ const userSchema = new mongoose.Schema({
   },
   addresses: [
     {
-      label: { type: String, default: 'Home' }, // Home / Office / Other
+      label: { type: String, default: 'Home' },
       addressLine1: String,
       addressLine2: String,
       city: String,
       state: String,
       pincode: String,
       phone: String,
-      latitude: Number,   // map pin location, set via Leaflet/OpenStreetMap picker on the frontend
+      latitude: Number,
       longitude: Number,
+      accuracy: Number,
       isDefault: { type: Boolean, default: false }
     }
   ],

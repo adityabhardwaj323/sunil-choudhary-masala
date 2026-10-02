@@ -18,14 +18,14 @@ const config: Config = {
         'brand-green': '#2A6B4A',
       },
       fontFamily: {
-        display: ['Playfair Display', 'Georgia', 'serif'],
-        body: ['Inter', 'system-ui', 'sans-serif'],
-        script: ['Kalam', 'cursive'],
+        display: ['var(--font-playfair)', 'Georgia', 'serif'],
+        body: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        script: ['var(--font-kalam)', 'cursive'],
         // Aliases matching the old site's font-family variable names,
         // since many components reference these class names directly.
-        playfair: ['Playfair Display', 'Georgia', 'serif'],
-        inter: ['Inter', 'system-ui', 'sans-serif'],
-        kalam: ['Kalam', 'cursive'],
+        playfair: ['var(--font-playfair)', 'Georgia', 'serif'],
+        inter: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        kalam: ['var(--font-kalam)', 'cursive'],
       },
       keyframes: {
         float: {
@@ -43,6 +43,10 @@ const config: Config = {
         spinSlow: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
         }
       },
       animation: {
@@ -51,6 +55,7 @@ const config: Config = {
         'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
         'pulse-soft': 'pulse-soft 4s ease-in-out infinite',
         'spin-slow': 'spinSlow 12s linear infinite',
+        marquee: 'marquee 30s linear infinite',
       },
       typography: () => ({
         // Custom "brown" color scheme for the `prose-brown` class used across

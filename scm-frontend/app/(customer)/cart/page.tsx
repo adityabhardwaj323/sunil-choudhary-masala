@@ -7,6 +7,10 @@ import { useCartWishlist } from '@/context/CartWishlistContext';
 import { formatPrice, scmImgUrl } from '@/lib/utils';
 import { Trash2, Minus, Plus, ArrowRight, Lock, ShoppingBag, ShieldCheck, Truck, Clock } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import FreeShippingBar from '@/components/cart/FreeShippingBar';
+import CartRecommendations from '@/components/cart/CartRecommendations';
+import { ViewCartTracker } from '@/components/seo/AnalyticsTracker';
+import { trackBeginCheckout } from '@/lib/analytics';
 
 export default function CartPage() {
   const router = useRouter();
@@ -95,8 +99,9 @@ export default function CartPage() {
     }
   };
 
-  const applyCoupon = async () => {
-    if (!coupon.trim()) {
+  const applyCoupon = async (codeOverride?: string) => {
+    const codeToApply = typeof codeOverride === 'string' ? codeOverride : coupon;
+    if (!codeToApply.trim()) {
       alert('Please enter a coupon code');
       return;
     }
@@ -104,11 +109,12 @@ export default function CartPage() {
       const res = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: coupon.trim(), orderValue: computeSubtotal() })
+        body: JSON.stringify({ code: codeToApply.trim(), orderValue: computeSubtotal() })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Invalid coupon code');
       setDiscount(data.discount);
+      if (typeof codeOverride === 'string') setCoupon(codeOverride);
       alert(`Coupon applied! ₹${data.discount} off.`);
     } catch (err: any) {
       setDiscount(0);
@@ -121,6 +127,7 @@ export default function CartPage() {
   };
 
   const proceedToCheckout = () => {
+    trackBeginCheckout(cart?.items || [], subtotal);
     sessionStorage.setItem('scm_checkout_discount', String(discount));
     sessionStorage.setItem('scm_checkout_coupon', coupon.trim());
     router.push('/checkout');
@@ -130,8 +137,11 @@ export default function CartPage() {
   const itemCount = (cart?.items || []).reduce((s: number, it: any) => s + it.quantity, 0);
 
   return (
-    <div className="bg-cream min-h-screen pb-12">
-      <div className="bg-charcoal text-cream py-10 px-4 mb-8">
+    <div className="bg-cream min-h-screen pb-20">
+      <ViewCartTracker cartItems={cart?.items || []} total={subtotal} />
+      
+      {/* Header */}
+      <div className="bg-charcoal text-cream py-6 px-4 mb-8">
         <div className="max-w-7xl mx-auto flex flex-col gap-2">
           <h1 className="font-playfair text-4xl font-bold">My Cart</h1>
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -177,9 +187,11 @@ export default function CartPage() {
         )}
 
         {!loading && !error && cart?.items && cart.items.length > 0 && (
-          <div className="flex flex-col lg:flex-row gap-8">
-            
-            {/* Left: Cart Items */}
+          <>
+            <FreeShippingBar subtotal={subtotal} />
+            <div className="flex flex-col lg:flex-row gap-8">
+              
+              {/* Left: Cart Items */}
             <div className="w-full lg:w-2/3 flex flex-col gap-6">
               <div className="bg-white rounded-2xl border border-cream-dark shadow-sm overflow-hidden">
                 <div className="hidden md:grid grid-cols-12 gap-4 p-6 bg-cream border-b border-cream-dark text-sm font-semibold text-charcoal uppercase tracking-wider">
@@ -283,6 +295,7 @@ export default function CartPage() {
                   </Link>
                 </div>
               </div>
+              <CartRecommendations />
             </div>
 
             {/* Right: Order Summary */}
@@ -320,9 +333,25 @@ export default function CartPage() {
                           />
                           <button 
                             className="bg-charcoal text-white px-6 font-semibold text-sm hover:bg-gray-800 transition-colors"
-                            onClick={applyCoupon}
+                            onClick={() => applyCoupon()}
                           >
                             Apply
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* First Order Offer */}
+                      {discount === 0 && (
+                        <div className="mt-2 flex items-center justify-between bg-saffron/10 border border-saffron/30 rounded-lg p-3">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-saffron uppercase tracking-wider">First Order?</span>
+                            <span className="text-sm font-medium text-charcoal">Use code <strong className="text-charcoal font-bold bg-white px-1 py-0.5 rounded border border-cream-mid">PEHLADABBA</strong></span>
+                          </div>
+                          <button 
+                            onClick={() => applyCoupon('PEHLADABBA')}
+                            className="text-xs font-bold bg-white border border-saffron text-saffron px-3 py-1.5 rounded hover:bg-saffron hover:text-white transition-colors"
+                          >
+                            Apply Now
                           </button>
                         </div>
                       )}
@@ -336,7 +365,7 @@ export default function CartPage() {
                   
                   <div className="flex justify-between items-center text-charcoal">
                     <span className="font-medium">Shipping</span>
-                    <span className="font-semibold text-green-700">Free</span>
+                    <span className="font-semibold text-green-700">Calculated at checkout</span>
                   </div>
                   
                   {discount > 0 && (
@@ -375,6 +404,7 @@ export default function CartPage() {
             </div>
             
           </div>
+          </>
         )}
       </div>
     </div>

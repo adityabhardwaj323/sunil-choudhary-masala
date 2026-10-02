@@ -1,11 +1,11 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const Coupon = require('./models/Coupon');
 
 async function createCoupon() {
   await mongoose.connect('mongodb://localhost:27017/scm');
   
   const coupon = await Coupon.create({
-    code: 'PHELADABBA',
+    code: 'PEHLADABBA',
     discountPercent: 10,
     isActive: true,
     isFirstOrderOnly: true,

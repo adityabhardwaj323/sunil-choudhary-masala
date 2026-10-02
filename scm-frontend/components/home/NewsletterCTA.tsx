@@ -6,14 +6,31 @@ import { FadeIn } from '@/components/motion/FadeIn';
 
 export default function NewsletterCTA() {
   const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSubscribe = () => {
-    if (!email.trim()) return;
-    // Matches old site behaviour: client-side only confirmation, no backend endpoint.
-    setSubscribed(true);
-    setEmail('');
-    setTimeout(() => setSubscribed(false), 3000);
+  const handleSubscribe = async () => {
+    if (!email.trim() || status === 'loading') return;
+    setStatus('loading');
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Subscription failed. Please try again.');
+      }
+      setStatus('success');
+      setEmail('');
+      setTimeout(() => setStatus('idle'), 5000);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Something went wrong. Please try again.');
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 4000);
+    }
   };
 
   return (
@@ -29,22 +46,36 @@ export default function NewsletterCTA() {
           Rajasthani recipes from our kitchen.
         </p>
 
-        <div className="flex gap-3 mt-6 flex-wrap justify-center w-full">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email address"
-            className="flex-1 min-w-[200px] px-[18px] py-3.5 rounded-lg border-2 border-white/15 bg-white/[0.07] text-white text-sm placeholder:text-white/40 outline-none focus:border-saffron transition-colors"
-          />
-          <button
-            onClick={handleSubscribe}
-            className="bg-brand-red hover:bg-saffron text-white rounded-lg px-6 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap flex items-center gap-2"
-          >
-            {subscribed ? 'Subscribed!' : 'Subscribe'}
-            <Send size={16} />
-          </button>
-        </div>
+        {status === 'success' ? (
+          <div className="mt-6 flex items-center gap-2 bg-green-900/40 border border-green-600/40 text-green-300 px-6 py-4 rounded-lg font-semibold text-sm">
+            ✅ You&apos;re subscribed! Welcome to the SCM community.
+          </div>
+        ) : (
+          <>
+            <div className="flex gap-3 mt-6 flex-wrap justify-center w-full">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
+                placeholder="Enter your email address"
+                disabled={status === 'loading'}
+                className="flex-1 min-w-[200px] px-[18px] py-3.5 rounded-lg border-2 border-white/15 bg-white/[0.07] text-white text-sm placeholder:text-white/40 outline-none focus:border-saffron transition-colors disabled:opacity-60"
+              />
+              <button
+                onClick={handleSubscribe}
+                disabled={status === 'loading'}
+                className="bg-brand-red hover:bg-saffron text-white rounded-lg px-6 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
+                <Send size={16} />
+              </button>
+            </div>
+            {status === 'error' && (
+              <p className="mt-3 text-red-400 text-sm font-medium">{errorMsg}</p>
+            )}
+          </>
+        )}
         <p className="mt-3 text-xs text-white/35">
           We respect your privacy. No spam, ever. Unsubscribe anytime.
         </p>

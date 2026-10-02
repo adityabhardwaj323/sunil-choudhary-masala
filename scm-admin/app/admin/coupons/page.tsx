@@ -34,6 +34,7 @@ export default function AdminCouponsPage() {
   const [expiryDate, setExpiryDate] = useState('');
   const [usageLimit, setUsageLimit] = useState<number | ''>('');
   const [isActive, setIsActive] = useState(true);
+  const [isFirstOrderOnly, setIsFirstOrderOnly] = useState(false);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,12 +101,16 @@ export default function AdminCouponsPage() {
     setFormError(null);
 
     try {
+      const expDate = new Date(expiryDate);
+      expDate.setHours(23, 59, 59, 999);
+
       const payload: any = {
         code: code.trim().toUpperCase(),
         discountPercent: Number(discountPercent),
         minOrderValue: minOrderValue === '' ? 0 : Number(minOrderValue),
-        expiryDate: new Date(expiryDate).toISOString(),
+        expiryDate: expDate.toISOString(),
         isActive,
+        isFirstOrderOnly,
       };
 
       if (maxDiscountAmount !== '') {
@@ -134,6 +139,7 @@ export default function AdminCouponsPage() {
       setMaxDiscountAmount('');
       setUsageLimit('');
       setIsActive(true);
+      setIsFirstOrderOnly(false);
       setShowCreateModal(false);
       fetchCoupons();
     } catch (err: any) {
@@ -462,22 +468,29 @@ export default function AdminCouponsPage() {
 
                       {/* Status */}
                       <td className="px-5 py-4">
-                        {isExpired ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-red/10 text-brand-red">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-red"></span>
-                            Expired
-                          </span>
-                        ) : coupon.isActive ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-green/10 text-brand-green">
-                            <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-                            Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500">
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                            Inactive
-                          </span>
-                        )}
+                        <div className="flex flex-col gap-1 items-start">
+                          {isExpired ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-red/10 text-brand-red">
+                              <span className="w-1.5 h-1.5 rounded-full bg-brand-red"></span>
+                              Expired
+                            </span>
+                          ) : coupon.isActive ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-brand-green/10 text-brand-green">
+                              <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
+                              Active
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500">
+                              <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                              Inactive
+                            </span>
+                          )}
+                          {(coupon as any).isFirstOrderOnly && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-saffron/10 text-saffron uppercase tracking-wider mt-1">
+                              First Order Only
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Actions */}
@@ -668,8 +681,8 @@ export default function AdminCouponsPage() {
                 </div>
               </div>
 
-              {/* Checkbox: Active status */}
-              <div className="pt-2">
+              {/* Checkbox: Active status & First Order Only */}
+              <div className="pt-2 flex flex-col gap-3">
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
@@ -679,6 +692,18 @@ export default function AdminCouponsPage() {
                   />
                   <span className="text-sm font-medium text-charcoal">
                     Activate coupon immediately upon creation
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isFirstOrderOnly}
+                    onChange={e => setIsFirstOrderOnly(e.target.checked)}
+                    className="w-4 h-4 rounded text-brand-red focus:ring-brand-red accent-brand-red"
+                  />
+                  <span className="text-sm font-medium text-charcoal">
+                    Valid for first order only
                   </span>
                 </label>
               </div>

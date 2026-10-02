@@ -57,7 +57,7 @@ export default function BlogPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogs.map((post) => (
-              <Link href={`/blog/`} key={post._id} className="bg-white rounded-2xl shadow-sm border border-cream-dark/50 overflow-hidden group hover:shadow-md hover:border-brand-red/30 transition-all flex flex-col">
+              <Link href={`/blog/${post.slug || post._id}`} key={post._id} className="bg-white rounded-2xl shadow-sm border border-cream-dark/50 overflow-hidden group hover:shadow-md hover:border-brand-red/30 transition-all flex flex-col">
                 {post.featuredImageUrl && (
                   <div className="relative h-64 w-full bg-cream-dark/10 overflow-hidden">
                     <Image 

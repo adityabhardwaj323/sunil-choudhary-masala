@@ -32,7 +32,15 @@ export default function AdminLoginPage() {
         }),
       });
 
-      const data = await res.json();
+      let data;
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.error('Non-JSON response from server:', text.substring(0, 200));
+        throw new Error('Authentication service returned an unexpected response.');
+      }
 
       if (!res.ok) {
         throw new Error(data.message || 'Invalid credentials or login failed');

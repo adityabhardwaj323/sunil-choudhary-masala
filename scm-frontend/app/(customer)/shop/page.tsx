@@ -22,6 +22,8 @@ import ProductCard from '@/components/home/ProductCard';
 import { ProductsResponse } from '@/types';
 import { Leaf } from 'lucide-react';
 
+import { ViewItemListTracker } from '@/components/seo/AnalyticsTracker';
+
 export default async function ShopPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
   let productsResponse: ProductsResponse = { count: 0, products: [] };
   let error = null;
@@ -36,6 +38,7 @@ export default async function ShopPage({ searchParams }: { searchParams: { [key:
 
   return (
     <>
+      <ViewItemListTracker products={products} listName="Shop - All Products" />
       {/* Hero Section */}
       <div className="relative bg-charcoal text-cream py-16 px-4 mb-8 overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
@@ -103,13 +106,7 @@ export default async function ShopPage({ searchParams }: { searchParams: { [key:
             
             </StaggerChildren>
 
-            {count > 0 && (
-              <div className="mt-12 flex justify-center">
-                <div className="flex items-center gap-2">
-                  <button className="w-10 h-10 rounded-full bg-charcoal text-white flex items-center justify-center shadow-md font-medium">1</button>
-                </div>
-              </div>
-            )}
+
           </main>
         </div>
       </div>

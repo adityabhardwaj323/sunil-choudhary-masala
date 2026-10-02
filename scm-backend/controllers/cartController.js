@@ -36,6 +36,9 @@ const addToCart = async (req, res) => {
     );
 
     const requestedQty = quantity || 1;
+    if (!Number.isInteger(requestedQty) || requestedQty < 1) {
+      return res.status(400).json({ message: 'Quantity must be a positive integer' });
+    }
     const currentQty = existingItem ? existingItem.quantity : 0;
     const newTotalQty = currentQty + requestedQty;
 
@@ -64,6 +67,9 @@ const addToCart = async (req, res) => {
 const updateCartItem = async (req, res) => {
   try {
     const { quantity } = req.body;
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ message: 'Quantity must be a positive integer' });
+    }
     const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) return res.status(404).json({ message: 'Cart not found' });
 

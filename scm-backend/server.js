@@ -29,7 +29,19 @@ const globalLimiter = rateLimit({
 });
 app.use('/api', globalLimiter);
 
-app.use(cors()); // allows our frontend (HTML files) to talk to this backend
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow non-browser requests (no origin) like Postman or internal services
+    if (!origin) return callback(null, true);
+    const allowedEnv = process.env.CORS_ORIGINS || '';
+    const allowed = allowedEnv.split(',').map(o => o.trim()).filter(Boolean);
+    // Development fallback: if no origins configured, allow everything
+    if (allowed.length === 0) return callback(null, true);
+    if (allowed.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+})); // CORS hardening – allowed origins defined via CORS_ORIGINS
 // We must handle the Razorpay webhook BEFORE express.json() parses the body,
 // because Razorpay signature validation requires the raw request body string.
 app.post('/api/orders/webhook', express.raw({ type: 'application/json' }), require('./controllers/orderController').razorpayWebhook);
@@ -46,6 +58,7 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 // ROUTES — each feature has its own file
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
+app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/coupons', require('./routes/couponRoutes'));
@@ -57,7 +70,7 @@ app.use('/api/banners', require('./routes/bannerRoutes'));
 app.use('/api/settings', require('./routes/settingsRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/gallery', require('./routes/galleryRoutes'));
-app.use('/api/blog', require('./routes/blogRoutes'));
+app.use('/api/blog', (req, res, next) => { console.log('--- BLOG REQUEST ---'); console.log(req.method, req.url); console.log(req.headers); next(); }, require('./routes/blogRoutes'));
 app.use('/api/location', require('./routes/locationRoutes'));
 
 // Test route — visit http://localhost:5000/ to check if server is running
@@ -76,7 +89,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong on the server', error: err.message });
 });
 
+const { verifyEmailConnection } = require('./utils/sendEmail');
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+  // Verify email connection after server starts
+  await verifyEmailConnection();
 });

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { formatPrice, scmImgUrl } from '@/lib/utils';
 import { useCartWishlist } from '@/context/CartWishlistContext';
+import { trackPurchase } from '@/lib/analytics';
 
 import { MapPin, CreditCard, Banknote, ShieldCheck, Lock, Check, Loader2, AlertTriangle, Store, Plus } from 'lucide-react';
 
@@ -32,7 +33,7 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', phone: '', addressLine1: '', addressLine2: '', city: 'Jaipur', state: 'Rajasthan', pincode: '', lat: 0, lng: 0
+    firstName: '', lastName: '', email: '', phone: '', addressLine1: '', addressLine2: '', city: 'Jaipur', state: 'Rajasthan', pincode: '', lat: 0, lng: 0, accuracy: 0 as number | undefined
   });
 
   const [paymentMethod, setPaymentMethod] = useState<'Online' | 'COD'>('Online');
@@ -110,25 +111,24 @@ export default function CheckoutPage() {
     }
   }, [formData.firstName]);
 
-    const handleLocationSelect = (lat: number, lng: number, addressDetails?: any) => {
-    if (!addressDetails) return;
-    
-    // In checkout, we need to switch to 'new' form
-    if (typeof setSelectedAddressId === 'function') {
-      setSelectedAddressId('new');
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      lat,
-      lng,
-      addressLine1: addressDetails.addressLine1 || '',
-      addressLine2: addressDetails.addressLine2 || '',
-      city: addressDetails.city || '',
-      state: addressDetails.state || '',
-      pincode: addressDetails.pincode || ''
-    }));
-  };
+    const handleLocationSelect = (lat: number, lng: number, accuracy: number | undefined, addressDetails?: any) => {
+      // In checkout, we need to switch to 'new' form
+      if (typeof setSelectedAddressId === 'function') {
+        setSelectedAddressId('new');
+      }
+  
+      setFormData(prev => ({
+        ...prev,
+        lat,
+        lng,
+        accuracy,
+        addressLine1: addressDetails?.addressLine1 || prev.addressLine1 || '',
+        addressLine2: addressDetails?.addressLine2 || prev.addressLine2 || '',
+        city: addressDetails?.city || prev.city || '',
+        state: addressDetails?.state || prev.state || '',
+        pincode: addressDetails?.pincode || prev.pincode || ''
+      }));
+    };
 
   const handleAddressSelect = (addrId: string) => {
     setSelectedAddressId(addrId);
@@ -190,7 +190,8 @@ export default function CheckoutPage() {
     state: formData.state,
     pincode: formData.pincode,
     latitude: formData.lat || undefined,
-    longitude: formData.lng || undefined
+    longitude: formData.lng || undefined,
+    accuracy: formData.accuracy || undefined
   });
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -222,6 +223,7 @@ export default function CheckoutPage() {
 
         sessionStorage.removeItem('scm_checkout_discount');
         sessionStorage.removeItem('scm_checkout_coupon');
+        trackPurchase(data.orderId, grandTotal, cart?.items || [], couponDiscount, deliveryCharge);
         refreshCart();
         router.push(`/order-success?orderId=${encodeURIComponent(data.orderId)}`);
       } else {
@@ -273,6 +275,7 @@ export default function CheckoutPage() {
 
               sessionStorage.removeItem('scm_checkout_discount');
               sessionStorage.removeItem('scm_checkout_coupon');
+              trackPurchase(orderData.orderId, grandTotal, cart?.items || [], couponDiscount, deliveryCharge);
               refreshCart();
               router.push(`/order-success?orderId=${encodeURIComponent(orderData.orderId)}`);
             } catch (err: any) {
@@ -444,44 +447,44 @@ export default function CheckoutPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-charcoal">First Name *</label>
-                      <input type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} placeholder="Sunil" required/>
+                      <label htmlFor="firstName" className="text-sm font-medium text-charcoal">First Name *</label>
+                      <input id="firstName" type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} placeholder="Sunil" required/>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-charcoal">Last Name *</label>
-                      <input type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} placeholder="Sharma" required/>
+                      <label htmlFor="lastName" className="text-sm font-medium text-charcoal">Last Name *</label>
+                      <input id="lastName" type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} placeholder="Sharma" required/>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-charcoal">Phone Number *</label>
-                      <input type="tel" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+91 98765 43210" required/>
+                      <label htmlFor="phone" className="text-sm font-medium text-charcoal">Phone Number *</label>
+                      <input id="phone" type="tel" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+91 98765 43210" required/>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-charcoal">Email Address</label>
-                      <input type="email" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="you@email.com"/>
+                      <label htmlFor="email" className="text-sm font-medium text-charcoal">Email Address</label>
+                      <input id="email" type="email" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="you@email.com"/>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5 mb-4">
-                    <label className="text-sm font-medium text-charcoal">Address Line 1 *</label>
-                    <input type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.addressLine1} onChange={e => setFormData({...formData, addressLine1: e.target.value})} placeholder="House/Flat No., Building, Street" required/>
+                    <label htmlFor="addressLine1" className="text-sm font-medium text-charcoal">Address Line 1 *</label>
+                    <input id="addressLine1" type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.addressLine1} onChange={e => setFormData({...formData, addressLine1: e.target.value})} placeholder="House/Flat No., Building, Street" required/>
                   </div>
 
                   <div className="flex flex-col gap-1.5 mb-4">
-                    <label className="text-sm font-medium text-charcoal">Address Line 2</label>
-                    <input type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.addressLine2} onChange={e => setFormData({...formData, addressLine2: e.target.value})} placeholder="Area, Colony, Landmark (optional)"/>
+                    <label htmlFor="addressLine2" className="text-sm font-medium text-charcoal">Address Line 2</label>
+                    <input id="addressLine2" type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.addressLine2} onChange={e => setFormData({...formData, addressLine2: e.target.value})} placeholder="Area, Colony, Landmark (optional)"/>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-charcoal">City *</label>
-                      <input type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} placeholder="Jaipur" required/>
+                      <label htmlFor="city" className="text-sm font-medium text-charcoal">City *</label>
+                      <input id="city" type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} placeholder="Jaipur" required/>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-charcoal">State *</label>
-                      <select className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors bg-white appearance-none" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} required>
+                      <label htmlFor="state" className="text-sm font-medium text-charcoal">State *</label>
+                      <select id="state" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors bg-white appearance-none" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} required>
                         <option>Rajasthan</option><option>Delhi</option><option>Maharashtra</option>
                         <option>Gujarat</option><option>Uttar Pradesh</option><option>Other</option>
                       </select>
@@ -490,8 +493,8 @@ export default function CheckoutPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-sm font-medium text-charcoal">PIN Code *</label>
-                      <input type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.pincode} onChange={e => setFormData({...formData, pincode: e.target.value})} placeholder="302001" maxLength={6} required/>
+                      <label htmlFor="pincode" className="text-sm font-medium text-charcoal">PIN Code *</label>
+                      <input id="pincode" type="text" className="px-4 py-2.5 rounded-xl border border-cream-dark focus:border-saffron focus:ring-1 focus:ring-saffron outline-none transition-colors" value={formData.pincode} onChange={e => setFormData({...formData, pincode: e.target.value})} placeholder="302001" maxLength={6} required/>
                     </div>
                   </div>
                 </div>

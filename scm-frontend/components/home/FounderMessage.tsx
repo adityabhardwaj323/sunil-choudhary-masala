@@ -32,14 +32,14 @@ export default function FounderMessage() {
             <blockquote className="border-l-4 border-brand-red pl-6 py-2 mb-6 bg-white/60 rounded-r-lg">
               <p className="font-playfair italic text-xl text-charcoal leading-relaxed">
                 "My mother always said — a meal made with pure spices feeds not just the body, but
-                the soul. For 35 years I have kept that promise. Every masala that leaves our mill
+                the soul. I have always kept that promise. Every masala that leaves our mill
                 carries the same commitment to purity that she taught me."
               </p>
             </blockquote>
 
             <p className="text-brown text-lg leading-relaxed mb-6">
               Sunil Choudhary started with a single stone-grinder and a dream to bring honest,
-              unadulterated spices to every Indian household. Today, thousands of families across
+              unadulterated spices to every Indian household. Today, families across
               India trust the SCM name.
             </p>
 

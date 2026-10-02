@@ -1,0 +1,8 @@
+[35mscm-backend/config/cloudinary.js[m[36m:[m[32m1[m[36m:[m// config/[1;31mcloudinary[m.js
+[35mscm-backend/config/cloudinary.js[m[36m:[m[32m13[m[36m:[m// Get them from your Cloudinary dashboard: https://[1;31mcloudinary[m.com/console
+[35mscm-backend/config/cloudinary.js[m[36m:[m[32m15[m[36m:[mconst [1;31mcloudinary[m = require('[1;31mcloudinary[m').v2;
+[35mscm-backend/config/cloudinary.js[m[36m:[m[32m17[m[36m:[m[1;31mcloudinary[m.config({
+[35mscm-backend/config/cloudinary.js[m[36m:[m[32m23[m[36m:[mmodule.exports = [1;31mcloudinary[m;
+[35mscm-backend/controllers/productController.js[m[36m:[m[32m5[m[36m:[mconst [1;31mcloudinary[m = require('../config/[1;31mcloudinary[m');
+[35mscm-backend/controllers/productController.js[m[36m:[m[32m116[m[36m:[m        return [1;31mcloudinary[m.uploader.upload(dataUri, {
+[35mscm-backend/package.json[m[36m:[m[32m12[m[36m:[m    "[1;31mcloudinary[m": "^1.41.3",

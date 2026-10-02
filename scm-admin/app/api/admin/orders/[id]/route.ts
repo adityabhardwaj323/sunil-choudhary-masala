@@ -2,43 +2,48 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000';
 
-// Express only exposes GET /api/orders (list, admin-only) and
-// PUT /api/orders/:id/status — there is no single-order-by-id admin
-// endpoint on the backend. This route fetches the admin order list
-// server-side and returns the matching order, so the frontend can still
-// treat it as a single-order lookup without any backend changes.
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const token = req.cookies.get('admin_jwt')?.value;
-  if (!token) {
-    return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-  }
-
+const forwardRequest = async (req: NextRequest, method: string, id: string, extraPath: string = '') => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/orders`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return NextResponse.json(errorData, { status: response.status });
+    const cookieToken = req.cookies.get('admin_jwt')?.value;
+    const headerAuth = req.headers.get('authorization');
+    let finalAuth = '';
+    
+    if (cookieToken) {
+      finalAuth = `Bearer ${cookieToken}`;
+    } else if (headerAuth) {
+      finalAuth = headerAuth.startsWith('Bearer ') ? headerAuth : `Bearer ${headerAuth}`;
     }
 
-    const orders = await response.json();
-    const list = Array.isArray(orders) ? orders : orders.orders || [];
-    const order = list.find(
-      (o: any) => o._id === params.id || o.orderId === params.id
-    );
+    const headers: Record<string, string> = {};
+    if (finalAuth) headers['Authorization'] = finalAuth;
 
-    if (!order) {
-      return NextResponse.json({ message: 'Order not found' }, { status: 404 });
+    const contentType = req.headers.get('content-type');
+    if (contentType) headers['Content-Type'] = contentType;
+
+    const options: any = {
+      method,
+      headers
+    };
+
+    if (method !== 'GET' && method !== 'HEAD') {
+      options.body = await req.arrayBuffer();
     }
 
-    return NextResponse.json(order);
+    const targetUrl = `${API_BASE_URL}/api/orders/${id}${extraPath}`;
+    const response = await fetch(targetUrl, options);
+    
+    if (response.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
+    
+    const data = await response.json().catch(() => null);
+    return NextResponse.json(data || { message: 'Success' }, { status: response.status });
   } catch (error: any) {
     return NextResponse.json({ message: 'Server error', error: error.message }, { status: 500 });
   }
-}
+};
+
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) { return forwardRequest(req, 'GET', params.id, ''); }
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) { return forwardRequest(req, 'PUT', params.id, ''); }
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) { return forwardRequest(req, 'PATCH', params.id, ''); }
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) { return forwardRequest(req, 'DELETE', params.id, ''); }

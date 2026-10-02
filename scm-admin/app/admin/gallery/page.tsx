@@ -78,7 +78,7 @@ export default function AdminGallery() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this image?')) return;
     try {
-      const res = await fetch(`/api/admin/gallery/${editingId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setImages(images.filter(img => img._id !== id));
       } else {

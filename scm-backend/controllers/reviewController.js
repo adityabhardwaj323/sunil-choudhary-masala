@@ -124,4 +124,19 @@ const approveReview = async (req, res) => {
   }
 };
 
-module.exports = { getProductReviews, addReview, deleteReview, getAllReviews, approveReview };
+// @route   GET /api/reviews/public/recent
+// @desc    Get recent approved reviews for public display
+const getRecentPublicReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find({ isApproved: true })
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .select('userName rating comment createdAt product') // minimal fields, no private info
+      .populate('product', 'name'); // only product name
+    res.json(reviews);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { getProductReviews, addReview, deleteReview, getAllReviews, approveReview, getRecentPublicReviews };

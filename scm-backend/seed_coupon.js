@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 dotenv.config({ path: '.env' });
 
@@ -6,10 +6,10 @@ mongoose.connect(process.env.MONGO_URI).then(async () => {
   const coupons = mongoose.connection.collection('coupons');
   
   await coupons.updateOne(
-    { code: 'PHELADABBA' },
+    { code: 'PEHLADABBA' },
     {
       $set: {
-        code: 'PHELADABBA',
+        code: 'PEHLADABBA',
         discountPercent: 10,
         isActive: true,
         isFirstOrderOnly: true,

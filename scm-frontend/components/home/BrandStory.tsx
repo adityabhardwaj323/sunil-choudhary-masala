@@ -37,8 +37,8 @@ export default function BrandStory() {
             {/* Decorative element */}
             <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-saffron rounded-full flex flex-col items-center justify-center text-white p-4 shadow-lg transform rotate-12 group hover:scale-105 transition-transform duration-300">
               <div className="absolute inset-0 border-2 border-dashed border-white/40 rounded-full animate-spin-slow"></div>
-              <span className="font-playfair text-3xl font-bold relative z-10">35+</span>
-              <span className="text-xs uppercase tracking-widest font-semibold text-center mt-1 relative z-10">Years of<br/>Purity</span>
+              <span className="font-playfair text-2xl font-bold relative z-10 text-center leading-none mt-2">100%</span>
+              <span className="text-[10px] uppercase tracking-widest font-semibold text-center mt-1 relative z-10">Purity<br/>Guaranteed</span>
             </div>
           </div>
 

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -25,6 +25,7 @@ export default function CategoryTabs() {
     { label: 'Dry Fruits & Nuts', value: 'Dry Fruits & Nuts' },
     { label: 'Healthy Snacks', value: 'Healthy Snacks' },
     { label: 'Cooking Oils', value: 'Cooking Oils' },
+    { label: 'Combos', value: 'Combos' },
   ];
 
   return (

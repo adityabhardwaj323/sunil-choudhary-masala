@@ -36,8 +36,9 @@ const orderSchema = new mongoose.Schema({
     state: String,
     pincode: String,
     addressType: String,
-    latitude: Number,   // map pin location, set via Leaflet/OpenStreetMap picker at checkout
-    longitude: Number
+    latitude: Number,
+    longitude: Number,
+    accuracy: Number
   },
   paymentMethod: {
     type: String,

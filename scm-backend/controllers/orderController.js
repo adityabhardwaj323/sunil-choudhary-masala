@@ -4,17 +4,27 @@
 
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
+const Settings = require('../models/Settings');
+const PendingOrder = require('../models/PendingOrder');
 const Product = require('../models/Product');
 const Coupon = require('../models/Coupon');
-const Settings = require('../models/Settings');
 const crypto = require('crypto');
 const { orderConfirmation, paymentConfirmation, orderStatusUpdate, refundUpdate } = require('../utils/emailTemplates');
-const sendEmail = require('../utils/sendEmail');
+const { sendEmail } = require('../utils/sendEmail');
 
-// Helper for idempotent email sending
+// Helper for strict idempotent email sending
 const sendOrderEmail = async (order, eventKey, subject, htmlContent) => {
-  if (!order.shippingAddress || !order.shippingAddress.email || (order.emailNotificationHistory && order.emailNotificationHistory.includes(eventKey))) return;
+  if (!order.shippingAddress || !order.shippingAddress.email) return;
   
+  // 1. Atomically try to claim the right to send this email event
+  const updateRes = await Order.updateOne(
+    { _id: order._id, emailNotificationHistory: { $ne: eventKey } },
+    { $addToSet: { emailNotificationHistory: eventKey } }
+  );
+
+  // If modifiedCount is 0, another request already sent it or is sending it
+  if (updateRes.modifiedCount === 0) return;
+
   try {
     await sendEmail({
       email: order.shippingAddress.email,
@@ -22,14 +32,18 @@ const sendOrderEmail = async (order, eventKey, subject, htmlContent) => {
       message: subject,
       html: htmlContent
     });
-    await Order.updateOne(
-      { _id: order._id },
-      { $addToSet: { emailNotificationHistory: eventKey } }
-    );
+    // Successfully sent. Ensure local object is updated in case it's used later in the request
     if (!order.emailNotificationHistory) order.emailNotificationHistory = [];
-    order.emailNotificationHistory.push(eventKey);
+    if (!order.emailNotificationHistory.includes(eventKey)) {
+      order.emailNotificationHistory.push(eventKey);
+    }
   } catch (error) {
     console.error(`Failed to send email (${eventKey}) for order ${order.orderId}:`, error.message);
+    // 2. Rollback the claim so we can retry on the next webhook/request
+    await Order.updateOne(
+      { _id: order._id },
+      { $pull: { emailNotificationHistory: eventKey } }
+    );
   }
 };
 
@@ -139,7 +153,7 @@ const validateAndCalculate = async (userId, paymentMethod, couponCode) => {
   let discount = 0;
   let validatedCouponCode = null;
   if (couponCode) {
-    const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+    const coupon = await Coupon.findOne({ code: couponCode.trim().toUpperCase() });
     if (coupon && coupon.isActive) {
       if (coupon.expiryDate && new Date() > new Date(coupon.expiryDate)) {
         return { error: 'This coupon has expired', status: 400 };
@@ -149,7 +163,7 @@ const validateAndCalculate = async (userId, paymentMethod, couponCode) => {
         return { error: `Minimum order value of ₹${coupon.minOrderValue} required`, status: 400 };
       } else {
         if (coupon.isFirstOrderOnly) {
-          const previousOrderCount = await Order.countDocuments({ user: userId, paymentStatus: { $ne: 'Failed' } });
+          const previousOrderCount = await Order.countDocuments({ user: userId, paymentStatus: { $ne: 'Failed' }, orderStatus: { $ne: 'Cancelled' } });
           if (previousOrderCount > 0) {
             return { error: 'This first-order offer is only available to new customers.', status: 400 };
           }
@@ -223,6 +237,23 @@ const placeOrder = async (req, res) => {
       shippingAddress, paymentMethod, couponCode,
       razorpayOrderId, razorpayPaymentId, razorpaySignature
     } = req.body;
+
+    if (shippingAddress) {
+      const { latitude, longitude, accuracy } = shippingAddress;
+      if (latitude !== undefined || longitude !== undefined) {
+        if (typeof latitude !== 'number' || latitude < -90 || latitude > 90 || Number.isNaN(latitude)) {
+          return res.status(400).json({ message: 'Invalid latitude' });
+        }
+        if (typeof longitude !== 'number' || longitude < -180 || longitude > 180 || Number.isNaN(longitude)) {
+          return res.status(400).json({ message: 'Invalid longitude' });
+        }
+      }
+      if (accuracy !== undefined) {
+        if (typeof accuracy !== 'number' || accuracy < 0 || Number.isNaN(accuracy)) {
+          return res.status(400).json({ message: 'Invalid accuracy' });
+        }
+      }
+    }
 
     // ── Duplicate payment protection ──
     if (razorpayPaymentId) {
@@ -306,8 +337,12 @@ const placeOrder = async (req, res) => {
       const updateResult = await Product.updateOne(
         {
           _id: item.product,
-          'variants.weight': item.weight,
-          'variants.stock': { $gte: item.quantity } // atomic guard
+          variants: {
+            $elemMatch: {
+              weight: item.weight,
+              stock: { $gte: item.quantity }
+            }
+          }
         },
         {
           $inc: { 'variants.$.stock': -item.quantity, totalSold: item.quantity }
@@ -319,7 +354,7 @@ const placeOrder = async (req, res) => {
         // Roll back any items already decremented in this loop.
         for (const prev of stockDecrementedItems) {
           await Product.updateOne(
-            { _id: prev.product, 'variants.weight': prev.weight },
+            { _id: prev.product, variants: { $elemMatch: { weight: prev.weight } } },
             { $inc: { 'variants.$.stock': prev.quantity, totalSold: -prev.quantity } }
           );
         }
@@ -431,7 +466,7 @@ const cancelOrder = async (req, res) => {
       if (order.paymentMethod === 'COD') {
         order.refundStatus = 'NotRequired';
       } else if (order.razorpayPaymentId) {
-        order.refundStatus = 'Pending';
+        order.refundStatus = 'Processing';
         try {
           const payment = await getRazorpay().payments.fetch(order.razorpayPaymentId);
           if (payment.amount_refunded >= payment.amount) {
@@ -447,15 +482,15 @@ const cancelOrder = async (req, res) => {
         } catch (err) {
           console.error('Razorpay refund error:', err);
           order.refundFailureReason = err.message || 'Error initiating refund';
-          order.refundStatus = 'Pending';
+          order.refundStatus = 'Processing';
         }
       } else {
-        order.refundStatus = 'Pending';
+        order.refundStatus = 'Processing';
       }
 
     for (const item of order.items) {
       await Product.updateOne(
-        { _id: item.product, 'variants.weight': item.weight },
+          { _id: item.product, variants: { $elemMatch: { weight: item.weight } } },
         { $inc: { 'variants.$.stock': item.quantity, totalSold: -item.quantity } }
       );
     }
@@ -544,7 +579,7 @@ const updateOrderStatus = async (req, res) => {
 
       for (const item of order.items) {
         await Product.updateOne(
-          { _id: item.product, 'variants.weight': item.weight },
+            { _id: item.product, variants: { $elemMatch: { weight: item.weight } } },
           { $inc: { 'variants.$.stock': item.quantity, totalSold: -item.quantity } }
         );
       }
@@ -577,7 +612,7 @@ const updateOrderStatus = async (req, res) => {
 };
 
 // @route   POST /api/orders/webhook
-// @desc    Handle Razorpay webhooks (e.g., refund.created, refund.processed, refund.failed)
+// @desc    Handle Razorpay webhooks (e.g., refund.created, refund.processed, refund.failed, payment.failed)
 const razorpayWebhook = async (req, res) => {
   try {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -639,15 +674,40 @@ const razorpayWebhook = async (req, res) => {
           refundUpdate(order, order.refundStatus)
         );
       }
+    } else if (event === 'payment.failed') {
+      const payment = payload.payload.payment.entity;
+      const paymentId = payment.id;
+      const email = payment.email;
+      const amount = payment.amount ? payment.amount / 100 : null; // paise to INR
+      
+      if (email) {
+        // Idempotency check
+        const PaymentFailureLog = require('../models/PaymentFailureLog');
+        try {
+          await PaymentFailureLog.create({ paymentId });
+          
+          // If we reach here, we are the first to handle this failure
+          const { paymentFailedEmail } = require('../utils/emailTemplates');
+          await sendEmail({
+            email,
+            subject: 'Payment Failed - Sunil Choudhary Masala',
+            message: 'Your payment has failed.',
+            html: paymentFailedEmail(payment.contact, paymentId, amount, payment.error_description)
+          });
+        } catch (err) {
+          if (err.code === 11000) {
+            // Already handled
+            console.log(`Duplicate payment.failed event for payment ${paymentId} ignored.`);
+          } else {
+            console.error('Error logging payment failure:', err);
+          }
+        }
+      }
     }
 
     res.status(200).json({ status: 'ok' });
   } catch (error) {
     console.error('Webhook processing error:', error);
-    // Return 200 anyway so Razorpay doesn't keep retrying immediately if we have a temporary issue,
-    // or depending on requirements, returning 500 will make Razorpay retry later.
-    // The instructions say "Return HTTP 200 promptly after valid webhook processing."
-    // Let's return 500 for parsing errors so we know, but 200 if signature matches.
     res.status(500).json({ message: 'Webhook error' });
   }
 };

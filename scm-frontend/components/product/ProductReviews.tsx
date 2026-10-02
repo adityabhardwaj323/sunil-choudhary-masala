@@ -120,11 +120,17 @@ export default function ProductReviews({ productId, ratingAvg, ratingCount }: Pr
         <div>
           <h2 className="font-playfair text-3xl font-bold text-charcoal mb-4">Customer Reviews</h2>
           <div className="flex items-center gap-4">
-            <div className="text-4xl font-bold text-charcoal">{(ratingAvg || 0).toFixed(1)}</div>
-            <div className="flex flex-col gap-1">
-              {getStars(ratingAvg || 0)}
-              <div className="text-sm font-medium text-brown">{ratingCount || reviews.length} verified reviews</div>
-            </div>
+            {ratingCount && ratingCount > 0 ? (
+              <>
+                <div className="text-4xl font-bold text-charcoal">{(ratingAvg || 0).toFixed(1)}</div>
+                <div className="flex flex-col gap-1">
+                  {getStars(ratingAvg || 0)}
+                  <div className="text-sm font-medium text-brown">{ratingCount || reviews.length} verified review{ratingCount === 1 ? '' : 's'}</div>
+                </div>
+              </>
+            ) : (
+              <div className="text-sm font-medium text-brown">0 verified reviews</div>
+            )}
           </div>
         </div>
         

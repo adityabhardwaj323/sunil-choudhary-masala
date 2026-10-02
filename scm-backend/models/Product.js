@@ -16,8 +16,7 @@ const productSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: true,
-    enum: ['Chilli Powders', 'Ground Spices', 'Dry Fruits & Nuts', 'Healthy Snacks', 'Cooking Oils']
+    required: true
   },
   images: [
     {

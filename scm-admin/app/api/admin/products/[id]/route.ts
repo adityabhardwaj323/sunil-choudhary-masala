@@ -2,111 +2,48 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const token = req.cookies.get('admin_jwt')?.value;
-  if (!token) return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-
+const forwardRequest = async (req: NextRequest, method: string, id: string, extraPath: string = '') => {
   try {
-    const search = req.nextUrl.search;
-    let url = `${API_BASE_URL}/api/products`;
-    url += `/${params.id}`;
-    url += search;
+    const cookieToken = req.cookies.get('admin_jwt')?.value;
+    const headerAuth = req.headers.get('authorization');
+    let finalAuth = '';
+    
+    if (cookieToken) {
+      finalAuth = `Bearer ${cookieToken}`;
+    } else if (headerAuth) {
+      finalAuth = headerAuth.startsWith('Bearer ') ? headerAuth : `Bearer ${headerAuth}`;
+    }
 
-    const options: RequestInit = {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        
-      },
-      cache: 'no-store'
+    const headers: Record<string, string> = {};
+    if (finalAuth) headers['Authorization'] = finalAuth;
+
+    const contentType = req.headers.get('content-type');
+    if (contentType) headers['Content-Type'] = contentType;
+
+    const options: any = {
+      method,
+      headers
     };
 
-    const response = await fetch(url, options);
-    
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const data = await response.json();
-      return NextResponse.json(data, { status: response.status });
-    } else {
-      const text = await response.text();
-      return new NextResponse(text, { status: response.status });
+    if (method !== 'GET' && method !== 'HEAD') {
+      options.body = await req.arrayBuffer();
     }
+
+    const targetUrl = `${API_BASE_URL}/api/products/${id}${extraPath}`;
+    const response = await fetch(targetUrl, options);
+    
+    if (response.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
+    
+    const data = await response.json().catch(() => null);
+    return NextResponse.json(data || { message: 'Success' }, { status: response.status });
   } catch (error: any) {
     return NextResponse.json({ message: 'Server error', error: error.message }, { status: 500 });
   }
-}
+};
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const token = req.cookies.get('admin_jwt')?.value;
-  if (!token) return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-
-  try {
-    const search = req.nextUrl.search;
-    let url = `${API_BASE_URL}/api/products`;
-    url += `/${params.id}`;
-    url += search;
-
-    const options: RequestInit = {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      cache: 'no-store'
-    };
-
-    // Parse body if present
-    try {
-      const body = await req.json();
-      options.body = JSON.stringify(body);
-    } catch(e) {}
-
-    const response = await fetch(url, options);
-    
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const data = await response.json();
-      return NextResponse.json(data, { status: response.status });
-    } else {
-      const text = await response.text();
-      return new NextResponse(text, { status: response.status });
-    }
-  } catch (error: any) {
-    return NextResponse.json({ message: 'Server error', error: error.message }, { status: 500 });
-  }
-}
-
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const token = req.cookies.get('admin_jwt')?.value;
-  if (!token) return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
-
-  try {
-    const search = req.nextUrl.search;
-    let url = `${API_BASE_URL}/api/products`;
-    url += `/${params.id}`;
-    url += search;
-
-    const options: RequestInit = {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        
-      },
-      cache: 'no-store'
-    };
-
-    const response = await fetch(url, options);
-    
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const data = await response.json();
-      return NextResponse.json(data, { status: response.status });
-    } else {
-      const text = await response.text();
-      return new NextResponse(text, { status: response.status });
-    }
-  } catch (error: any) {
-    return NextResponse.json({ message: 'Server error', error: error.message }, { status: 500 });
-  }
-}
-
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) { return forwardRequest(req, 'GET', params.id, ''); }
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) { return forwardRequest(req, 'PUT', params.id, ''); }
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) { return forwardRequest(req, 'PATCH', params.id, ''); }
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) { return forwardRequest(req, 'DELETE', params.id, ''); }

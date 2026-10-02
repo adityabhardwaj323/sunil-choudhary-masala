@@ -1,5 +1,6 @@
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import WhatsAppWidget from '@/components/layout/WhatsAppWidget';
 import { cookies } from 'next/headers';
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         {children}
       </main>
       <Footer />
+      <WhatsAppWidget />
     </>
   );
 }

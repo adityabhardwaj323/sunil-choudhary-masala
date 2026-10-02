@@ -30,7 +30,7 @@ export function formatDateTime(date: string | Date): string {
 }
 
 export function scmImgUrl(url?: string): string {
-  if (!url) return '/placeholder.jpg';
+  if (!url) return '/asset_35.jpg';
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
     return url;
   }

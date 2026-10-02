@@ -92,7 +92,7 @@ export default function AdminBlog() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this blog post?')) return;
     try {
-      const res = await fetch(`/api/admin/blog/${editingId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setBlogs(blogs.filter(b => b._id !== id));
       } else {

@@ -185,9 +185,9 @@ function SearchResults() {
             <div className="w-full max-w-2xl">
               <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Popular Searches</h4>
               <div className="flex flex-wrap justify-center gap-3">
-                <Link href="/search?q=Mirchi" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors">Chilli Powders</Link>
-                <Link href="/search?q=Haldi" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors">Dry Fruits & Nuts</Link>
-                <Link href="/search?q=Dhaniya" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors">Healthy Snacks</Link>
+                <Link href="/search?q=Mirchi" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors">Mirchi / Chilli</Link>
+                <Link href="/search?q=Haldi" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors">Haldi / Turmeric</Link>
+                <Link href="/search?q=Dhaniya" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors">Dhaniya / Coriander</Link>
                 <Link href="/search?q=Garam+Masala" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors">Garam Masala</Link>
               </div>
             </div>
@@ -203,13 +203,13 @@ function SearchResults() {
             <div className="w-full max-w-2xl">
               <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Suggested Categories</h4>
               <div className="flex flex-wrap justify-center gap-3">
-                <Link href="/search?q=Whole" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors flex items-center gap-2">
+                <Link href="/shop?category=Chilli+Powders" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors flex items-center gap-2">
                   <span>Chilli Powders</span> <ArrowRight size={14} className="text-gray-400" />
                 </Link>
-                <Link href="/search?q=Ground" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors flex items-center gap-2">
+                <Link href="/shop?category=Ground+Spices" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors flex items-center gap-2">
                   <span>Ground Spices</span> <ArrowRight size={14} className="text-gray-400" />
                 </Link>
-                <Link href="/search?q=Blended" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors flex items-center gap-2">
+                <Link href="/shop?category=Healthy+Snacks" className="px-5 py-2.5 bg-cream/50 border border-cream-dark rounded-full text-charcoal font-medium hover:border-saffron hover:bg-cream transition-colors flex items-center gap-2">
                   <span>Healthy Snacks</span> <ArrowRight size={14} className="text-gray-400" />
                 </Link>
               </div>

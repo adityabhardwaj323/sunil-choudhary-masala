@@ -44,11 +44,16 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/account',
     '/account/:path*',
+    '/checkout',
     '/checkout/:path*',
+    '/orders',
     '/orders/:path*',
     '/order-detail/:path*',
+    '/cart',
     '/cart/:path*',
+    '/wishlist',
     '/wishlist/:path*',
     '/login',
     '/register',
