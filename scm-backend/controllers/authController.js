@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { sendEmail } = require('../utils/sendEmail');
+const { OAuth2Client } = require('google-auth-library');
 
 // Helper: Creates a JWT token for a user (valid for 30 days by default)
 const generateToken = (id) => {
@@ -136,17 +137,32 @@ const getMe = async (req, res) => {
 // NOTE: requires frontend to send Google ID token after Google Sign-In popup
 const googleAuth = async (req, res) => {
   try {
-    const { googleId, email, firstName, lastName } = req.body;
-    // In production, verify googleId token using google-auth-library here
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: 'Missing Google credential' });
+    }
 
-    // Only include conditions for fields that are actually present.
-    // { email: undefined } gets silently dropped from a Mongo query,
-    // which would turn `$or: [{googleId}, {}]` into a match-everything
-    // condition (an empty {} matches every document) — so findOne would
-    // return an arbitrary, unrelated user instead of null.
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    // Validate payload
+    if (!payload?.email || !payload.email_verified) {
+      return res.status(401).json({ message: 'Invalid Google token' });
+    }
+
+    const googleId = payload.sub;
+    const email = payload.email.toLowerCase();
+    const firstName = payload.given_name || '';
+    const lastName = payload.family_name || '';
+
+    // Find or create user
     const dupConditions = [];
     if (googleId) dupConditions.push({ googleId });
-    if (email) dupConditions.push({ email: email.toLowerCase() });
+    if (email) dupConditions.push({ email });
     let user = dupConditions.length ? await User.findOne({ $or: dupConditions }) : null;
 
     if (!user) {
@@ -162,12 +178,14 @@ const googleAuth = async (req, res) => {
       lastName: user.lastName,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id)
+      token: generateToken(user._id),
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+
 
 // @route   PUT /api/auth/profile
 // @desc    Update user profile
@@ -431,3 +449,4 @@ const resetPassword = async (req, res) => {
 };
 
 module.exports = { register, login, getMe, googleAuth, updateProfile, forgotPassword, resendResetOtp, verifyOtp, resetPassword };
+

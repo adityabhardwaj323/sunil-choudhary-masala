@@ -49,7 +49,7 @@ export default async function BlogPreview() {
         </FadeIn>
 
         {/* 3 Blog Cards Grid */}
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <StaggerChildren className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 px-4 -mx-4 pb-6 pt-2 md:pt-0 md:pb-0 md:px-0 md:mx-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-8">
           {blogs.map((post) => {
             const excerpt = post.excerpt?.trim() || stripHtml(post.content);
             const postDate = post.publishedAt || post.createdAt;
@@ -62,20 +62,20 @@ export default async function BlogPreview() {
               : null;
 
             return (
-              <MotionItem key={post._id} whileHover={{ y: -4 }} className="h-full">
+              <MotionItem key={post._id} whileHover={{ y: -4 }} className="h-full w-[85vw] sm:w-[320px] shrink-0 snap-start md:w-auto">
                 <Link
                   href={`/blog/${post.slug || post._id}`}
                   className="group bg-white rounded-2xl border border-cream-mid/70 shadow-sm hover:shadow-md hover:border-brand-red/30 transition-all duration-300 overflow-hidden flex flex-col h-full focus:outline-none focus:ring-2 focus:ring-brand-red"
                   aria-label={`Read article: ${post.title}`}
                 >
                   {/* Featured Image */}
-                  <div className="relative h-48 sm:h-52 w-full bg-cream-dark/30 overflow-hidden">
+                  <div className="relative h-40 sm:h-48 lg:h-52 w-full bg-cream-dark/30 overflow-hidden">
                     {post.featuredImageUrl ? (
                       <Image
                         src={post.featuredImageUrl}
                         alt={post.title}
                         fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        sizes="(max-width: 768px) 85vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                         unoptimized={post.featuredImageUrl.includes('cloudinary')}
                       />
@@ -87,7 +87,7 @@ export default async function BlogPreview() {
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-6 flex-1 flex flex-col">
+                  <div className="p-5 md:p-6 flex-1 flex flex-col">
                     <div className="flex items-center justify-between mb-3 gap-2">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-saffron bg-saffron/10 px-2.5 py-0.5 rounded-full">
                         {post.category || 'Spices'}
@@ -100,15 +100,15 @@ export default async function BlogPreview() {
                       )}
                     </div>
 
-                    <h3 className="font-playfair font-bold text-lg md:text-xl text-charcoal mb-2.5 line-clamp-2 group-hover:text-brand-red transition-colors leading-snug">
+                    <h3 className="font-playfair font-bold text-lg md:text-xl text-charcoal mb-2 line-clamp-2 group-hover:text-brand-red transition-colors leading-snug">
                       {post.title}
                     </h3>
 
-                    <p className="text-stone-600 text-sm leading-relaxed line-clamp-3 mb-5 flex-1">
+                    <p className="text-stone-600 text-[13px] md:text-sm leading-relaxed line-clamp-2 md:line-clamp-3 mb-4 flex-1">
                       {excerpt}
                     </p>
 
-                    <div className="pt-4 border-t border-cream-mid/40 flex items-center justify-between">
+                    <div className="pt-3 md:pt-4 border-t border-cream-mid/40 flex items-center justify-between">
                       <span className="text-brand-red font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 group-hover:translate-x-1 transition-transform">
                         Read More <ArrowRight size={14} />
                       </span>

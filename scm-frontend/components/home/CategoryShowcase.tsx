@@ -102,8 +102,17 @@ export default async function CategoryShowcase() {
           </p>
         </FadeIn>
 
-        {/* Animated Marquee (Default) */}
-        <div className="relative w-full overflow-hidden motion-reduce:hidden group mt-4">
+        {/* Mobile Horizontal Scroll */}
+        <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-3 px-4 -mx-4 pb-4 mt-4">
+          {categories.map((cat) => (
+            <div key={`cat-mob-${cat.name}`} className="w-[140px] shrink-0 snap-start">
+              <CategoryCard cat={cat} />
+            </div>
+          ))}
+        </div>
+
+        {/* Animated Marquee (Desktop Default) */}
+        <div className="hidden md:block relative w-full overflow-hidden motion-reduce:hidden group mt-4">
           <div className="flex w-max animate-marquee hover:[animation-play-state:paused] transition-transform">
             {/* First Set */}
             <div className="flex gap-4 px-2">

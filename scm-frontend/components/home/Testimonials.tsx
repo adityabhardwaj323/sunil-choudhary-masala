@@ -91,19 +91,19 @@ export default function Testimonials() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 px-4 -mx-4 pb-4 md:px-0 md:mx-0 md:pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
           {reviews.map((review) => (
-            <div key={review._id} className="bg-cream p-6 rounded-2xl border border-cream-dark hover:border-saffron/30 transition-colors">
-              <Quote className="text-saffron opacity-20 w-8 h-8 mb-4" />
-              <div className="flex text-saffron mb-3">
+            <div key={review._id} className="w-[85vw] sm:w-[320px] md:w-auto shrink-0 snap-start bg-cream p-5 md:p-6 rounded-2xl border border-cream-dark hover:border-saffron/30 transition-colors flex flex-col h-full">
+              <Quote className="text-saffron opacity-20 w-6 h-6 md:w-8 md:h-8 mb-3 md:mb-4 shrink-0" />
+              <div className="flex text-saffron mb-3 shrink-0">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={16} fill={i < review.rating ? "currentColor" : "none"} className={i < review.rating ? "text-saffron" : "text-gray-300"} />
+                  <Star key={i} size={15} fill={i < review.rating ? "currentColor" : "none"} className={i < review.rating ? "text-saffron" : "text-gray-300"} />
                 ))}
               </div>
-              <p className="text-charcoal mb-6 italic line-clamp-4">"{review.comment}"</p>
-              <div className="flex flex-col mt-auto pt-4 border-t border-cream-dark">
-                <span className="font-bold text-charcoal">{review.userName}</span>
-                <span className="text-xs text-brand-red font-medium mt-1">Verified Purchase: {review.product?.name || 'Product'}</span>
+              <p className="text-charcoal mb-4 md:mb-6 text-[13px] md:text-base italic line-clamp-3 md:line-clamp-4 flex-1">"{review.comment}"</p>
+              <div className="flex flex-col mt-auto pt-4 border-t border-cream-dark shrink-0">
+                <span className="font-bold text-charcoal text-sm md:text-base">{review.userName}</span>
+                <span className="text-[11px] md:text-xs text-brand-red font-medium mt-1">Verified Purchase: {review.product?.name || 'Product'}</span>
               </div>
             </div>
           ))}
