@@ -49,7 +49,7 @@ export default async function BlogPreview() {
         </FadeIn>
 
         {/* 3 Blog Cards Grid */}
-        <StaggerChildren className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 px-4 -mx-4 pb-6 pt-2 md:pt-0 md:pb-0 md:px-0 md:mx-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 lg:gap-8">
+        <StaggerChildren className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 lg:gap-8 sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {blogs.map((post) => {
             const excerpt = post.excerpt?.trim() || stripHtml(post.content);
             const postDate = post.publishedAt || post.createdAt;
@@ -60,9 +60,12 @@ export default async function BlogPreview() {
                   year: 'numeric',
                 })
               : null;
+              
+            const imageUrl = post.featuredImageUrl?.trim();
+            const hasValidImage = imageUrl && imageUrl.length > 5;
 
             return (
-              <MotionItem key={post._id} whileHover={{ y: -4 }} className="h-full w-[85vw] sm:w-[320px] shrink-0 snap-start md:w-auto">
+              <MotionItem key={post._id} whileHover={{ y: -4 }} className="h-full w-[85vw] min-w-[280px] max-w-[320px] shrink-0 snap-center sm:w-auto sm:min-w-0 sm:max-w-none">
                 <Link
                   href={`/blog/${post.slug || post._id}`}
                   className="group bg-white rounded-2xl border border-cream-mid/70 shadow-sm hover:shadow-md hover:border-brand-red/30 transition-all duration-300 overflow-hidden flex flex-col h-full focus:outline-none focus:ring-2 focus:ring-brand-red"
@@ -70,14 +73,14 @@ export default async function BlogPreview() {
                 >
                   {/* Featured Image */}
                   <div className="relative h-40 sm:h-48 lg:h-52 w-full bg-cream-dark/30 overflow-hidden">
-                    {post.featuredImageUrl ? (
+                    {hasValidImage ? (
                       <Image
-                        src={post.featuredImageUrl}
+                        src={imageUrl}
                         alt={post.title}
                         fill
                         sizes="(max-width: 768px) 85vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        unoptimized={post.featuredImageUrl.includes('cloudinary')}
+                        unoptimized={true}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#4a2010] to-[#7a3518] text-white/50">

@@ -189,13 +189,21 @@ export default function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean })
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: shouldReduceMotion ? 0 : 0.3 }}
-              className="lg:hidden bg-white border-t border-cream-dark overflow-hidden pb-4"
+              className="lg:hidden bg-white border-t border-cream-dark overflow-y-auto pb-4 max-h-[calc(100vh-80px)]"
             >
               <div className="px-5 py-4 flex flex-col gap-6">
                 
+                {/* QUICK LINKS */}
+                <div className="flex flex-col gap-4 pb-5 border-b border-cream-dark">
+                  <Link href="/" className="text-xl font-playfair font-bold text-charcoal" onClick={() => setMobileOpen(false)}>Home</Link>
+                  <Link href="/shop" className="text-xl font-playfair font-bold text-charcoal" onClick={() => setMobileOpen(false)}>Shop</Link>
+                  <Link href="/about" className="text-xl font-playfair font-bold text-charcoal" onClick={() => setMobileOpen(false)}>About</Link>
+                  <Link href="/contact" className="text-xl font-playfair font-bold text-charcoal" onClick={() => setMobileOpen(false)}>Contact</Link>
+                </div>
+
                 {/* SHOP */}
                 <div>
-                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Shop</div>
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Shop Categories</div>
                   <div className="flex flex-col gap-3">
                     <Link href="/shop" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>All Masalas</Link>
                     <Link href="/shop?filter=bestsellers" className="text-lg font-medium text-charcoal" onClick={() => setMobileOpen(false)}>Best Sellers</Link>
@@ -222,7 +230,7 @@ export default function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean })
                   </div>
                 </div>
                 
-                <Link href="/shop?filter=bestsellers" onClick={() => setMobileOpen(false)} className="bg-brand-red text-white py-3.5 rounded-xl font-bold flex justify-center mt-2">
+                <Link href="/shop?filter=bestsellers" onClick={() => setMobileOpen(false)} className="bg-brand-red text-white py-3.5 rounded-xl font-bold flex justify-center mt-2 mb-8">
                   SHOP BESTSELLERS
                 </Link>
 
