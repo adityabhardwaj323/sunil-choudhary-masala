@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const range = searchParams.get('range') || 'all';
 
-    const baseUrl = process.env.API_BASE_URL || 'http://localhost:5000';
+    const baseUrl = process.env.API_BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://scm-backend-ork4.onrender.com' : 'http://localhost:5000');
     const response = await fetch(`${baseUrl}/api/analytics?range=${range}`, {
       headers: {
         Authorization: `Bearer ${token}`,
