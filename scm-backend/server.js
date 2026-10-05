@@ -73,6 +73,11 @@ app.use('/api/gallery', require('./routes/galleryRoutes'));
 app.use('/api/blog', (req, res, next) => { console.log('--- BLOG REQUEST ---'); console.log(req.method, req.url); console.log(req.headers); next(); }, require('./routes/blogRoutes'));
 app.use('/api/location', require('./routes/locationRoutes'));
 
+// Health check endpoint for monitoring and keep-alive (zero DB overhead)
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Test route — visit http://localhost:5000/ to check if server is running
 app.get('/', (req, res) => {
   res.json({ message: '🌶️ Sunil Choudhary Masala Backend API is running!' });

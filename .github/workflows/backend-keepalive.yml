@@ -1,0 +1,33 @@
+name: Render Backend Keep-Alive
+
+on:
+  schedule:
+    # Runs every 10 minutes (UTC)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: backend-keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping-health:
+    name: Ping Health Endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Ping Backend /api/health
+        run: |
+          echo "Pinging Render backend health endpoint..."
+          RESPONSE=$(curl --silent --show-error --max-time 30 --write-out "\nHTTP_STATUS:%{http_code}\nTIME:%{time_total}s\n" https://scm-backend-ork4.onrender.com/api/health)
+          echo "$RESPONSE"
+          
+          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d':' -f2)
+          
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "::error::Render backend returned unexpected HTTP status $HTTP_STATUS"
+            exit 1
+          fi
+          
+          echo "Backend health check passed successfully."
