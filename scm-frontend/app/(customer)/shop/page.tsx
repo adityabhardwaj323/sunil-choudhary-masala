@@ -45,7 +45,7 @@ export default async function ShopPage({ searchParams }: { searchParams: { [key:
         <div className="max-w-7xl mx-auto relative z-10 flex flex-col items-center text-center">
           <Leaf className="text-saffron mb-4" size={32} />
           <h1 className="font-playfair text-4xl md:text-5xl font-bold mb-4">Shop Our Collection</h1>
-          <p className="font-kalam text-xl text-cream-mid max-w-2xl mb-6">Authentic flavours, carefully crafted for every kitchen.</p>
+          <p className="font-body uppercase tracking-[0.2em] text-xs font-semibold text-xl text-cream-mid max-w-2xl mb-6">Authentic flavours, carefully crafted for every kitchen.</p>
           <div className="flex items-center gap-2 text-sm text-gray-400 font-medium tracking-widest uppercase">
             <Link href="/" className="hover:text-saffron transition-colors">Home</Link>
             <span>/</span>

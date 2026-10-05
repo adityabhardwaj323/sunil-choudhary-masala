@@ -1,8 +1,9 @@
+import { getBackendUrl } from '@/lib/apiConfig';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000';
+    const API_BASE_URL = getBackendUrl();
     
     const response = await fetch(`${API_BASE_URL}/api/settings/public`, {
       method: 'GET',

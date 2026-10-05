@@ -23,7 +23,7 @@ export default async function FeaturedProducts() {
     <section className="py-20 bg-cream">
       <div className="container mx-auto px-4 max-w-7xl">
         <FadeIn className="text-center mb-12 flex flex-col items-center">
-          <span className="font-kalam text-brand-red text-xl mb-2">Signature Quality</span>
+          <span className="font-body uppercase tracking-[0.2em] text-xs font-semibold text-brand-red text-xl mb-2">Signature Quality</span>
           <h2 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-6">Made for Every Indian Kitchen</h2>
           <SectionDivider />
           <p className="text-brown max-w-2xl mt-6">

@@ -20,7 +20,7 @@ export default function FounderMessage() {
 
           {/* RIGHT: Content */}
           <div className="w-full lg:w-3/5 flex flex-col justify-center">
-            <span className="font-kalam text-saffron text-xl mb-3 block">✦ Founder's Message</span>
+            <span className="font-body uppercase tracking-[0.2em] text-xs font-semibold text-saffron text-xl mb-3 block">✦ Founder's Message</span>
             <h2 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-6 leading-tight">
               A Promise from<br />Our Family to Yours
             </h2>

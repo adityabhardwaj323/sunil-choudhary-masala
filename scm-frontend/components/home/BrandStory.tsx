@@ -30,53 +30,39 @@ export default function BrandStory() {
           
           {/* LEFT: Image Area */}
           <div className="w-full lg:w-1/2 relative">
-            <div className="relative aspect-[4/5] md:aspect-video lg:aspect-[4/5] rounded-2xl overflow-hidden shadow-xl bg-charcoal">
+            <div className="relative aspect-[4/5] md:aspect-video lg:aspect-[4/5] overflow-hidden bg-charcoal">
               <img src="/asset_31.jpg" alt="Our Story" className="w-full h-full object-cover" />
-            </div>
-            
-            {/* Decorative element */}
-            <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-saffron rounded-full flex flex-col items-center justify-center text-white p-4 shadow-lg transform rotate-12 group hover:scale-105 transition-transform duration-300">
-              <div className="absolute inset-0 border-2 border-dashed border-white/40 rounded-full animate-spin-slow"></div>
-              <span className="font-playfair text-2xl font-bold relative z-10 text-center leading-none mt-2">100%</span>
-              <span className="text-[10px] uppercase tracking-widest font-semibold text-center mt-1 relative z-10">Purity<br/>Guaranteed</span>
             </div>
           </div>
 
           {/* RIGHT: Content */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center">
-            <span className="font-kalam text-saffron text-xl mb-3 block">✦ Our Story</span>
-            <h2 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-charcoal mb-6 leading-tight">
+          <div className="w-full lg:w-1/2 flex flex-col justify-center lg:pl-10">
+            <span className="font-body text-brand-red uppercase tracking-[0.2em] text-xs font-semibold mb-4 block">
+              Our Story
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-charcoal mb-6 leading-[1.15]">
               Crafted with Love,<br />Rooted in Rajasthan
             </h2>
             
-            <div className="mb-8">
-              <SectionDivider />
-            </div>
-            
-            <p className="text-brown text-lg leading-relaxed mb-8">
+            <p className="font-body text-charcoal/80 text-lg leading-relaxed mb-10 max-w-lg">
               Sunil Choudhary Masala was born out of a passion for authentic Rajasthani cooking. From our humble stone-grinding mill in Rajasthan, we bring the same time-honoured recipes to kitchens across India.
             </p>
 
-            <div className="flex flex-col gap-5 mb-8">
+            <div className="flex flex-col gap-6 mb-10 border-l-2 border-cream-mid pl-6">
               {aboutItems.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-saffron/10 text-saffron flex items-center justify-center shrink-0">
-                    {item.icon}
-                  </div>
                   <div>
-                    <strong className="block text-charcoal font-semibold">{item.title}</strong>
-                    <span className="text-brown text-sm">{item.text}</span>
+                    <strong className="block text-charcoal font-display text-lg mb-1">{item.title}</strong>
+                    <span className="text-charcoal/60 font-body text-sm leading-relaxed">{item.text}</span>
                   </div>
                 </div>
               ))}
             </div>
             
             <div>
-              <Link href="/about">
-                <Button variant="primary" className="flex items-center gap-2 group">
-                  Read Our Full Story
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </Button>
+              <Link href="/about" className="inline-flex items-center gap-2 text-brand-red font-semibold font-body tracking-wide hover:text-charcoal transition-colors">
+                READ OUR FULL STORY
+                <ArrowRight size={18} />
               </Link>
             </div>
           </div>

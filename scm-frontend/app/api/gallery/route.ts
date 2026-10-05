@@ -1,8 +1,9 @@
+import { getBackendUrl } from '@/lib/apiConfig';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = getBackendUrl();
 
 export async function GET(req: NextRequest) {
   try {

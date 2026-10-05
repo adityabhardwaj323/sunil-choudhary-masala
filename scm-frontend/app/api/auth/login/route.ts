@@ -1,9 +1,10 @@
+import { getBackendUrl, isSecureCookie } from '@/lib/apiConfig';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const backendUrl = process.env.API_BASE_URL || 'http://localhost:5000';
+    const backendUrl = getBackendUrl();
     
     const backendRes = await fetch(`${backendUrl}/api/auth/login`, {
       method: 'POST',
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
     
     response.cookies.set('customer_jwt', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecureCookie(req),
       sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60, // 30 days
       path: '/',

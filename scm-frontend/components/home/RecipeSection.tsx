@@ -33,7 +33,7 @@ export default function RecipeSection() {
     <section className="py-20 bg-cream-dark">
       <FadeIn className="container mx-auto px-4 max-w-7xl">
         <div className="text-center mb-16 flex flex-col items-center">
-          <span className="font-kalam text-saffron text-xl mb-2">✦ Cooking Inspiration</span>
+          <span className="font-body uppercase tracking-[0.2em] text-xs font-semibold text-saffron text-xl mb-2">✦ Cooking Inspiration</span>
           <h2 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-6">Bring More Flavour to the Table</h2>
           <SectionDivider />
           <p className="text-brown max-w-2xl mt-6">

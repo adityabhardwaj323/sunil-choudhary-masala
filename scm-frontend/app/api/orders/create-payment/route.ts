@@ -1,6 +1,7 @@
+import { getBackendUrl } from '@/lib/apiConfig';
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = getBackendUrl();
 
 // POST /api/orders/create-payment
 // Proxy to Express: creates a Razorpay order with server-calculated amount

@@ -29,7 +29,7 @@ export default async function BestSellers() {
       <ViewItemListTracker products={products} listName="Homepage Best Sellers" />
       <FadeIn className="container mx-auto px-4 max-w-7xl">
         <div className="text-center mb-12 flex flex-col items-center">
-          <span className="font-kalam text-brand-red text-xl mb-2">Most Loved</span>
+          <span className="font-body uppercase tracking-[0.2em] text-xs font-semibold text-brand-red text-xl mb-2">Most Loved</span>
           <h2 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-6">Our Bestsellers</h2>
           <SectionDivider />
           <p className="text-brown max-w-2xl mt-6">
@@ -37,13 +37,9 @@ export default async function BestSellers() {
           </p>
         </div>
         
-        <StaggerChildren className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 lg:gap-8 sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {products.map((product: any) => (
-            <MotionItem 
-              key={product._id} 
-              whileHover={{ y: -4 }} 
-              className="h-full w-[85vw] min-w-[280px] max-w-[320px] shrink-0 snap-center sm:w-auto sm:min-w-0 sm:max-w-none"
-            >
+            <MotionItem key={product._id} whileHover={{ y: -4 }} className="h-full">
               <ProductCard product={product} />
             </MotionItem>
           ))}

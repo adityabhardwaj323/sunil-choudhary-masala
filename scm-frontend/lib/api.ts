@@ -1,9 +1,7 @@
 import { ProductsResponse, Product, BlogPost } from '@/types';
+import { getBackendUrl } from '@/lib/apiConfig';
 
-// Use API_BASE_URL for server-side fetching, fallback to NEXT_PUBLIC_API_URL or localhost
-const getBaseUrl = () => {
-  return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-};
+const getBaseUrl = getBackendUrl;
 
 export async function fetchProducts(searchParams?: { [key: string]: string | string[] | undefined }): Promise<ProductsResponse> {
   const baseUrl = getBaseUrl();

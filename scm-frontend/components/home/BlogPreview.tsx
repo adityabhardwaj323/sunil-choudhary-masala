@@ -32,24 +32,20 @@ export default async function BlogPreview() {
   }
 
   return (
-    <section className="py-20 px-4 md:px-8 bg-cream/70">
+    <section className="py-20 md:py-32 px-6 md:px-12 bg-white">
       <div className="container mx-auto max-w-7xl">
         {/* Section Header */}
-        <FadeIn className="text-center mb-12 flex flex-col items-center">
-          <span className="font-kalam text-saffron text-base md:text-lg mb-2 block tracking-wide">
-            ✦ From Our Kitchen
+        <FadeIn className="text-center mb-16 flex flex-col items-center">
+          <span className="font-body text-brand-red uppercase tracking-[0.2em] text-xs font-semibold mb-3 block">
+            From Our Kitchen
           </span>
-          <h2 className="font-playfair text-[28px] md:text-[44px] font-bold text-charcoal mb-3">
-            Latest From SCM
+          <h2 className="font-display text-3xl md:text-[44px] font-bold text-charcoal mb-4">
+            Recipes &amp; Stories
           </h2>
-          <SectionDivider />
-          <p className="text-brown max-w-2xl text-sm md:text-base mt-4 leading-relaxed">
-            Recipes, culinary traditions, and spice stories.
-          </p>
         </FadeIn>
 
-        {/* 3 Blog Cards Grid */}
-        <StaggerChildren className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-6 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 lg:gap-8 sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {/* Horizontal Mobile Scroll / Desktop Grid */}
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 overflow-x-auto snap-x snap-mandatory gap-6 md:gap-8 pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0 hide-scrollbar">
           {blogs.map((post) => {
             const excerpt = post.excerpt?.trim() || stripHtml(post.content);
             const postDate = post.publishedAt || post.createdAt;
@@ -60,76 +56,67 @@ export default async function BlogPreview() {
                   year: 'numeric',
                 })
               : null;
-              
-            const imageUrl = post.featuredImageUrl?.trim();
-            const hasValidImage = imageUrl && imageUrl.length > 5;
 
             return (
-              <MotionItem key={post._id} whileHover={{ y: -4 }} className="h-full w-[85vw] min-w-[280px] max-w-[320px] shrink-0 snap-center sm:w-auto sm:min-w-0 sm:max-w-none">
+              <div key={post._id} className="min-w-[280px] w-[80vw] md:w-auto shrink-0 snap-start h-full">
                 <Link
                   href={`/blog/${post.slug || post._id}`}
-                  className="group bg-white rounded-2xl border border-cream-mid/70 shadow-sm hover:shadow-md hover:border-brand-red/30 transition-all duration-300 overflow-hidden flex flex-col h-full focus:outline-none focus:ring-2 focus:ring-brand-red"
+                  className="group flex flex-col h-full focus:outline-none"
                   aria-label={`Read article: ${post.title}`}
                 >
                   {/* Featured Image */}
-                  <div className="relative h-40 sm:h-48 lg:h-52 w-full bg-cream-dark/30 overflow-hidden">
-                    {hasValidImage ? (
+                  <div className="relative aspect-[4/3] w-full bg-[#FAF7F1] overflow-hidden mb-5">
+                    {post.featuredImageUrl ? (
                       <Image
-                        src={imageUrl}
+                        src={post.featuredImageUrl}
                         alt={post.title}
                         fill
-                        sizes="(max-width: 768px) 85vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        unoptimized={true}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        unoptimized={post.featuredImageUrl.includes('cloudinary')}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#4a2010] to-[#7a3518] text-white/50">
-                        <BookOpen size={48} className="opacity-40" />
+                      <div className="w-full h-full flex items-center justify-center text-charcoal/20">
+                        <BookOpen size={48} strokeWidth={1} />
                       </div>
                     )}
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-5 md:p-6 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between mb-3 gap-2">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-saffron bg-saffron/10 px-2.5 py-0.5 rounded-full">
-                        {post.category || 'Spices'}
+                  <div className="flex-1 flex flex-col px-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-brand-red">
+                        {post.category || 'Recipes'}
                       </span>
-                      {formattedDate && (
-                        <div className="flex items-center gap-1.5 text-stone-500 text-xs">
-                          <Calendar size={13} />
-                          <span>{formattedDate}</span>
-                        </div>
-                      )}
                     </div>
 
-                    <h3 className="font-playfair font-bold text-lg md:text-xl text-charcoal mb-2 line-clamp-2 group-hover:text-brand-red transition-colors leading-snug">
+                    <h3 className="font-display font-bold text-xl md:text-2xl text-charcoal mb-3 line-clamp-2 group-hover:text-brand-red transition-colors leading-[1.3]">
                       {post.title}
                     </h3>
 
-                    <p className="text-stone-600 text-[13px] md:text-sm leading-relaxed line-clamp-2 md:line-clamp-3 mb-4 flex-1">
+                    <p className="font-body text-charcoal/70 text-[15px] leading-relaxed line-clamp-2 mb-5 flex-1">
                       {excerpt}
                     </p>
 
-                    <div className="pt-3 md:pt-4 border-t border-cream-mid/40 flex items-center justify-between">
-                      <span className="text-brand-red font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 group-hover:translate-x-1 transition-transform">
-                        Read More <ArrowRight size={14} />
+                    <div className="mt-auto pt-2">
+                      <span className="font-body text-charcoal font-semibold text-sm uppercase tracking-wide flex items-center gap-1.5 group-hover:text-brand-red transition-colors">
+                        Read Story <ArrowRight size={14} />
                       </span>
                     </div>
                   </div>
                 </Link>
-              </MotionItem>
+              </div>
             );
           })}
-        </StaggerChildren>
+        </div>
 
         {/* View All Blogs CTA Button */}
-        <div className="mt-12 text-center">
+        <div className="mt-16 text-center">
           <Link
             href="/blog"
-            className="border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-xs hover:shadow-md inline-flex items-center gap-2 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand-red"
+            className="text-brand-red font-semibold font-body tracking-wide hover:text-charcoal transition-colors inline-flex items-center gap-2"
           >
-            View All Blogs <ArrowRight size={16} />
+            VIEW ALL STORIES &rarr;
           </Link>
         </div>
       </div>

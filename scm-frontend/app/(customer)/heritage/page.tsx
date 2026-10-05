@@ -86,7 +86,7 @@ export default function HeritagePage() {
               {timeline.map((item, idx) => (
                 <div key={idx} className="relative">
                   <div className="absolute -left-[41px] top-1 w-4 h-4 rounded-full bg-brand-red border-4 border-cream" />
-                  <span className="font-kalam text-saffron text-sm tracking-wide">{item.era}</span>
+                  <span className="font-body uppercase tracking-[0.2em] text-xs font-semibold text-saffron text-sm tracking-wide">{item.era}</span>
                   <h3 className="font-playfair text-xl font-bold text-charcoal mt-1 mb-2">{item.title}</h3>
                   <p className="text-brown text-[15px] leading-relaxed">{item.text}</p>
                 </div>

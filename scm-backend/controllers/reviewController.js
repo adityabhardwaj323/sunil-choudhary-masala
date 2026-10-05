@@ -3,10 +3,15 @@
 
 const Review = require('../models/Review');
 const Product = require('../models/Product');
+const mongoose = require('mongoose');
 
 // @route   GET /api/reviews/:productId
 const getProductReviews = async (req, res) => {
   try {
+    // Guard: return empty array (not 500) for non-ObjectId product IDs
+    if (!mongoose.Types.ObjectId.isValid(req.params.productId)) {
+      return res.json([]);
+    }
     const reviews = await Review.find({ product: req.params.productId, isApproved: true }).sort({ createdAt: -1 });
     res.json(reviews);
   } catch (error) {
@@ -33,6 +38,10 @@ const addReview = async (req, res) => {
     const { rating, comment } = req.body;
     const productId = req.params.productId;
     const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: 'Invalid product ID.' });
+    }
 
     // 1. Verify that the user has actually purchased and received the product.
     // Must be Delivered, not Cancelled, and belong to the user.

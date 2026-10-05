@@ -55,23 +55,22 @@ export default function Testimonials() {
   if (error || reviews.length === 0) {
     return (
       <section className="py-20 bg-white">
-        <FadeIn className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center mb-8 flex flex-col items-center">
-            <span className="font-kalam text-saffron text-xl mb-2">✦ Customer Love</span>
-            <h2 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-6">Real Customer Experiences</h2>
+        <FadeIn className="container mx-auto px-6 max-w-7xl">
+          <div className="text-center mb-10 flex flex-col items-center">
+            <span className="font-body text-brand-red uppercase tracking-[0.2em] text-xs font-semibold mb-3 block">
+              Customer Love
+            </span>
+            <h2 className="font-display text-3xl md:text-[44px] font-bold text-charcoal mb-4">Real Customer Experiences</h2>
             <SectionDivider />
           </div>
 
-          <div className="bg-cream-dark p-8 md:p-12 rounded-2xl border border-cream-mid max-w-3xl mx-auto text-center">
-            <Quote className="text-saffron opacity-20 w-16 h-16 mx-auto mb-6" />
-            <p className="text-charcoal font-medium leading-relaxed mb-6">
+          <div className="bg-cream p-8 md:p-12 rounded-sm max-w-3xl mx-auto text-center">
+            <Quote className="text-brand-red opacity-10 w-12 h-12 mx-auto mb-6" />
+            <p className="text-charcoal font-body text-lg leading-relaxed mb-6">
               We value genuine feedback from our community. Every rating and review on our website comes from verified customers who have received and experienced our products. 
             </p>
-            <p className="text-brown text-sm mb-8">
-              Browse our catalogue to read real reviews on individual product pages, or leave your own review after your next purchase!
-            </p>
-            <a href="/shop" className="inline-flex bg-charcoal text-white hover:bg-black transition-colors px-6 py-3 rounded-full font-bold shadow-md">
-              Explore Products
+            <a href="/shop" className="inline-flex text-brand-red font-semibold font-body tracking-wide hover:text-charcoal transition-colors">
+              EXPLORE PRODUCTS &rarr;
             </a>
           </div>
         </FadeIn>
@@ -80,30 +79,30 @@ export default function Testimonials() {
   }
 
   return (
-    <section className="py-20 bg-white">
-      <FadeIn className="container mx-auto px-4 max-w-7xl">
-        <div className="text-center mb-12 flex flex-col items-center">
-          <span className="font-kalam text-saffron text-xl mb-2">✦ Customer Love</span>
-          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-charcoal mb-6">Verified Customer Reviews</h2>
-          <SectionDivider />
-          <p className="mt-4 text-brown max-w-xl mx-auto">
-            Reviews from customers who have genuinely purchased and experienced our products.
-          </p>
+    <section className="py-20 md:py-32 bg-white">
+      <FadeIn className="container mx-auto px-6 md:px-12 max-w-7xl">
+        <div className="text-center mb-16 flex flex-col items-center">
+          <span className="font-body text-brand-red uppercase tracking-[0.2em] text-xs font-semibold mb-3 block">
+            Customer Love
+          </span>
+          <h2 className="font-display text-3xl md:text-[44px] font-bold text-charcoal mb-4">Verified Reviews</h2>
         </div>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 px-4 -mx-4 pb-4 md:px-0 md:mx-0 md:pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
+        {/* Mobile Horizontal Scroll, Desktop Grid */}
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 overflow-x-auto snap-x snap-mandatory gap-8 pb-8 md:pb-0 -mx-6 px-6 md:mx-0 md:px-0 hide-scrollbar">
           {reviews.map((review) => (
-            <div key={review._id} className="w-[85vw] sm:w-[320px] md:w-auto shrink-0 snap-start bg-cream p-5 md:p-6 rounded-2xl border border-cream-dark hover:border-saffron/30 transition-colors flex flex-col h-full">
-              <Quote className="text-saffron opacity-20 w-6 h-6 md:w-8 md:h-8 mb-3 md:mb-4 shrink-0" />
-              <div className="flex text-saffron mb-3 shrink-0">
+            <div key={review._id} className="min-w-[300px] w-[80vw] md:w-auto shrink-0 snap-start flex flex-col bg-white border-l border-cream-mid pl-8 py-2 relative">
+              <div className="flex text-saffron mb-4">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={15} fill={i < review.rating ? "currentColor" : "none"} className={i < review.rating ? "text-saffron" : "text-gray-300"} />
+                  <Star key={i} size={14} fill={i < review.rating ? "currentColor" : "none"} className={i < review.rating ? "text-saffron" : "text-cream-mid"} />
                 ))}
               </div>
-              <p className="text-charcoal mb-4 md:mb-6 text-[13px] md:text-base italic line-clamp-3 md:line-clamp-4 flex-1">"{review.comment}"</p>
-              <div className="flex flex-col mt-auto pt-4 border-t border-cream-dark shrink-0">
-                <span className="font-bold text-charcoal text-sm md:text-base">{review.userName}</span>
-                <span className="text-[11px] md:text-xs text-brand-red font-medium mt-1">Verified Purchase: {review.product?.name || 'Product'}</span>
+              <p className="font-display text-charcoal text-xl leading-relaxed mb-8 line-clamp-4 relative z-10">
+                "{review.comment}"
+              </p>
+              <div className="mt-auto">
+                <span className="block font-body text-charcoal font-semibold text-sm mb-1">— {review.userName}</span>
+                <span className="block font-body text-[11px] text-charcoal/50 uppercase tracking-wider">Verified Buyer • {review.product?.name || 'Product'}</span>
               </div>
             </div>
           ))}

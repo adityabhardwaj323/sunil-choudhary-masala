@@ -36,7 +36,7 @@ export default function PackagingPromise() {
           </div>
 
           <div className="order-1 lg:order-2">
-            <span className="font-kalam text-saffron text-xl mb-3 block">✦ Packaging</span>
+            <span className="font-body uppercase tracking-[0.2em] text-xs font-semibold text-saffron text-xl mb-3 block">✦ Packaging</span>
             <h2 className="font-playfair text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
               Sealed to Preserve<br />Every Grain of Flavour
             </h2>

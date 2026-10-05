@@ -37,7 +37,7 @@ export default function NewsletterCTA() {
     <section className="py-20 px-8 bg-charcoal relative overflow-hidden">
       <FadeIn>
       <div className="max-w-[560px] mx-auto text-center relative z-10 flex flex-col items-center">
-        <span className="font-kalam text-saffron text-base mb-2.5 block">✦ Stay Connected</span>
+        <span className="font-body uppercase tracking-[0.2em] text-xs font-semibold text-saffron text-base mb-2.5 block">✦ Stay Connected</span>
         <h2 className="font-playfair text-[28px] md:text-[44px] font-bold text-white mb-4">
           Get Recipes &amp; Exclusive Offers
         </h2>

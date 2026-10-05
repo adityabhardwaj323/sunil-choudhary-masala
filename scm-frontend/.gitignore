@@ -16,3 +16,8 @@ dist/
 logs/
 
 .env.*
+
+# Debug/temp scripts (contain test tokens -- never commit)
+fix.js
+test_routes.js
+API_Fix_Report.md
