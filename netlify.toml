@@ -1,3 +1,0 @@
-[build]
-  base = "scm-frontend"
-  command = "npm run build"
